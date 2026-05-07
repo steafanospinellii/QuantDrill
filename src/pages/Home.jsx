@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { Flame, Zap, Award, ChevronRight, Lock, Star } from 'lucide-react';
+import { Flame, Zap, ChevronRight, Star, Settings, ChevronDown } from 'lucide-react';
 import { hasCompletedTodaysSprint, isStreakAlive } from '@/lib/streakUtils';
+import SettingsModal from '@/components/SettingsModal';
+import DifficultySheet from '@/components/DifficultySheet';
+
+const DIFFICULTY_LABELS = { easy: 'Easy · 15s', medium: 'Medium · 12s', hard: 'Hard · 8s' };
 
 export default function Home() {
   const navigate = useNavigate();
@@ -11,6 +15,8 @@ export default function Home() {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [difficulty, setDifficulty] = useState('medium');
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [diffSheetOpen, setDiffSheetOpen] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -32,12 +38,6 @@ export default function Home() {
   const lastSession = sessions[0];
   const lastScore = lastSession?.score ?? null;
 
-  const difficultyOptions = [
-    { key: 'easy', label: 'Easy', desc: '15s timer' },
-    { key: 'medium', label: 'Medium', desc: '12s timer' },
-    { key: 'hard', label: 'Hard', desc: '8s timer', premium: true },
-  ];
-
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -47,7 +47,10 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background px-5 pt-12 pb-6 flex flex-col">
+    <div
+      className="min-h-screen bg-background px-5 pb-6 flex flex-col"
+      style={{ paddingTop: 'max(48px, env(safe-area-inset-top, 48px))' }}
+    >
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div className="flex items-center justify-between mb-8">
@@ -57,11 +60,12 @@ export default function Home() {
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5 tracking-wide">PERFORMANCE LAB</p>
           </div>
-          <Link to="/badges">
-            <div className="w-9 h-9 bg-surface-2 rounded-xl flex items-center justify-center border border-border hover:border-primary transition-colors">
-              <Award size={16} className="text-muted-foreground" />
-            </div>
-          </Link>
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="w-9 h-9 bg-surface-2 rounded-xl flex items-center justify-center border border-border hover:border-primary transition-colors no-select"
+          >
+            <Settings size={16} className="text-muted-foreground" />
+          </button>
         </div>
 
         {/* Stats Row */}
@@ -108,30 +112,16 @@ export default function Home() {
         </motion.div>
       )}
 
-      {/* Difficulty Selector */}
+      {/* Difficulty selector — Bottom Sheet on mobile */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="mb-6">
         <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-3">Difficulty</p>
-        <div className="grid grid-cols-3 gap-2">
-          {difficultyOptions.map(opt => (
-            <button
-              key={opt.key}
-              onClick={() => !opt.premium && setDifficulty(opt.key)}
-              className={`relative rounded-xl py-3 px-2 text-center transition-all duration-200 border ${
-                difficulty === opt.key && !opt.premium
-                  ? 'bg-primary/10 border-primary text-foreground'
-                  : 'bg-surface-2 border-border text-muted-foreground hover:border-border/60'
-              } ${opt.premium ? 'opacity-60 cursor-default' : 'cursor-pointer'}`}
-            >
-              {opt.premium && (
-                <span className="absolute top-1.5 right-1.5">
-                  <Lock size={10} className="text-neon-orange" />
-                </span>
-              )}
-              <p className="text-xs font-semibold">{opt.label}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{opt.desc}</p>
-            </button>
-          ))}
-        </div>
+        <button
+          onClick={() => setDiffSheetOpen(true)}
+          className="w-full flex items-center justify-between bg-surface-2 border border-border rounded-2xl px-4 py-3.5 no-select hover:border-primary/50 transition-colors"
+        >
+          <span className="text-sm font-semibold text-foreground">{DIFFICULTY_LABELS[difficulty]}</span>
+          <ChevronDown size={16} className="text-muted-foreground" />
+        </button>
       </motion.div>
 
       {/* CTA */}
@@ -143,7 +133,7 @@ export default function Home() {
       >
         <button
           onClick={() => navigate(`/drill?difficulty=${difficulty}`)}
-          className="w-full bg-primary text-primary-foreground font-grotesk font-bold text-lg py-5 rounded-2xl glow-purple transition-all duration-200 active:scale-95 flex items-center justify-center gap-3"
+          className="w-full bg-primary text-primary-foreground font-grotesk font-bold text-lg py-5 rounded-2xl glow-purple transition-all duration-200 active:scale-95 flex items-center justify-center gap-3 no-select"
         >
           <Zap size={22} />
           {completedToday ? 'Start Another Drill' : 'Start Daily Drill'}
@@ -154,6 +144,15 @@ export default function Home() {
           10 questions · ~3 minutes · Score 0–100
         </p>
       </motion.div>
+
+      {/* Modals */}
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <DifficultySheet
+        open={diffSheetOpen}
+        value={difficulty}
+        onChange={setDifficulty}
+        onClose={() => setDiffSheetOpen(false)}
+      />
     </div>
   );
 }

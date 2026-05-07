@@ -45,6 +45,34 @@
   body {
     @apply bg-background text-foreground font-inter;
     -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+  }
+
+  /* Respect system dark/light preference — app is always dark but this future-proofs */
+  @media (prefers-color-scheme: light) {
+    :root {
+      color-scheme: dark; /* force dark rendering on system UI elements */
+    }
+  }
+}
+
+@layer utilities {
+  /* Disable text selection on interactive UI elements */
+  .no-select {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Safe area helpers */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .safe-top {
+    padding-top: max(12px, env(safe-area-inset-top));
   }
 }
 

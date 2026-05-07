@@ -1,0 +1,122 @@
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Trash2, LogOut, AlertTriangle, ChevronRight } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+
+export default function SettingsModal({ open, onClose }) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleLogout = () => {
+    base44.auth.logout('/');
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      // Clear user data then logout
+      await base44.auth.updateMe({ streak_count: 0, last_active_date: null });
+      base44.auth.logout('/');
+    } catch (e) {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 z-40 no-select"
+          />
+
+          {/* Bottom sheet */}
+          <motion.div
+            key="sheet"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-surface-1 border-t border-border rounded-t-3xl z-50 pb-safe"
+          >
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 bg-surface-3 rounded-full" />
+            </div>
+
+            <div className="px-5 pt-3 pb-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-grotesk font-bold text-foreground">Settings</h2>
+                <button onClick={onClose} className="w-8 h-8 bg-surface-2 rounded-xl flex items-center justify-center no-select">
+                  <X size={16} className="text-muted-foreground" />
+                </button>
+              </div>
+
+              {!showDeleteConfirm ? (
+                <div className="space-y-2">
+                  {/* Logout */}
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-4 bg-surface-2 border border-border rounded-2xl text-left no-select hover:border-border/60 transition-colors"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-surface-3 flex items-center justify-center">
+                      <LogOut size={16} className="text-muted-foreground" />
+                    </div>
+                    <span className="text-sm font-medium text-foreground flex-1">Log Out</span>
+                    <ChevronRight size={16} className="text-muted-foreground" />
+                  </button>
+
+                  {/* Delete account */}
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="w-full flex items-center gap-3 px-4 py-4 bg-red-500/5 border border-red-500/20 rounded-2xl text-left no-select hover:bg-red-500/10 transition-colors"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center">
+                      <Trash2 size={16} className="text-red-400" />
+                    </div>
+                    <span className="text-sm font-medium text-red-400 flex-1">Delete Account</span>
+                    <ChevronRight size={16} className="text-red-400/60" />
+                  </button>
+                </div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                >
+                  <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 rounded-2xl p-4">
+                    <AlertTriangle size={18} className="text-red-400 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-foreground mb-1">Delete your account?</p>
+                      <p className="text-xs text-muted-foreground">This will permanently erase your streak, scores, and all progress. This cannot be undone.</p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={deleting}
+                    className="w-full bg-red-500 text-white font-grotesk font-bold py-4 rounded-2xl no-select active:scale-95 transition-all disabled:opacity-60"
+                  >
+                    {deleting ? 'Deleting...' : 'Yes, Delete My Account'}
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="w-full bg-surface-2 border border-border text-foreground font-semibold py-4 rounded-2xl no-select active:scale-95 transition-all"
+                  >
+                    Cancel
+                  </button>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
