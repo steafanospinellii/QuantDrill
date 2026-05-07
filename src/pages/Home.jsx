@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { Flame, Zap, Star, Settings, ChevronDown, ChevronRight } from 'lucide-react';
+import { Flame, Zap, Star, Settings, ChevronDown, ChevronRight, Lock } from 'lucide-react';
 import { hasCompletedTodaysSprint, isStreakAlive } from '@/lib/streakUtils';
 import SettingsModal from '@/components/SettingsModal';
 import DifficultySheet from '@/components/DifficultySheet';
 import CategoryCards from '@/components/CategoryCards';
+import { getDrillAccess, FREE_DAILY_LIMIT } from '@/lib/freemium';
 
 const DIFFICULTY_LABELS = { easy: 'Easy · 15s', medium: 'Medium · 12s', hard: 'Hard · 8s' };
 
@@ -39,6 +40,7 @@ export default function Home() {
   const lastSession = sessions[0];
   const lastScore = lastSession?.score ?? null;
   const totalDrills = sessions.length;
+  const { allowed: drillAllowed, remaining, isPremium } = getDrillAccess(sessions, user);
 
   if (loading) {
     return (
@@ -128,16 +130,32 @@ export default function Home() {
         </button>
 
         {/* Big CTA */}
-        <button
-          onClick={() => navigate(`/drill?difficulty=${difficulty}&category=daily`)}
-          className="w-full bg-primary text-primary-foreground font-grotesk font-bold text-lg py-5 rounded-2xl glow-purple transition-all duration-200 active:scale-95 flex items-center justify-center gap-3 no-select"
-        >
-          <Zap size={22} />
-          {completedToday ? 'Train Again' : 'Start Daily Drill'}
-          <ChevronRight size={20} />
-        </button>
+        {drillAllowed ? (
+          <button
+            onClick={() => navigate(`/drill?difficulty=${difficulty}&category=daily`)}
+            className="w-full bg-primary text-primary-foreground font-grotesk font-bold text-lg py-5 rounded-2xl glow-purple transition-all duration-200 active:scale-95 flex items-center justify-center gap-3 no-select"
+          >
+            <Zap size={22} />
+            {completedToday ? 'Train Again' : 'Start Daily Drill'}
+            <ChevronRight size={20} />
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate('/paywall')}
+            className="w-full bg-surface-2 border border-border text-foreground font-grotesk font-bold text-lg py-5 rounded-2xl transition-all duration-200 active:scale-95 flex items-center justify-center gap-3 no-select"
+          >
+            <Lock size={20} className="text-muted-foreground" />
+            Daily Limit Reached
+            <ChevronRight size={20} className="text-muted-foreground" />
+          </button>
+        )}
         <p className="text-center text-xs text-muted-foreground mt-2.5">
-          10 questions · mixed categories · ~3 min
+          {isPremium
+            ? '10 questions · mixed categories · ~3 min'
+            : drillAllowed
+              ? `${remaining} of ${FREE_DAILY_LIMIT} free drills remaining today`
+              : 'Upgrade to drill without limits'
+          }
         </p>
       </motion.div>
 

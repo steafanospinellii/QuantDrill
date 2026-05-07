@@ -6,6 +6,9 @@ import { Flame, TrendingUp, Zap, Target } from 'lucide-react';
 import { format, subDays } from 'date-fns';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import PullToRefreshIndicator from '@/components/PullToRefreshIndicator';
+import { CATEGORY_LABELS } from '@/lib/badges';
+
+const CATEGORIES = ['mental_math', 'percentages_growth', 'business_math', 'market_sizing', 'gmat_quant'];
 
 export default function Progress() {
   const [sessions, setSessions] = useState([]);
@@ -16,7 +19,7 @@ export default function Progress() {
     try {
       const [u, s] = await Promise.all([
         base44.auth.me(),
-        base44.entities.Session.list('-date', 30),
+        base44.entities.Session.list('-date', 200),
       ]);
       setUser(u);
       setSessions(s);
@@ -28,31 +31,33 @@ export default function Progress() {
 
   const { containerRef, pullDistance, isRefreshing, handlers } = usePullToRefresh(load);
 
-  // Build last 7 days chart data
+  // Last 7 days chart
   const last7 = Array.from({ length: 7 }, (_, i) => {
     const d = subDays(new Date(), 6 - i);
     const dateStr = d.toISOString().split('T')[0];
-    const session = sessions.find(s => s.date === dateStr);
-    return {
-      day: format(d, 'EEE'),
-      score: session?.score ?? null,
-      accuracy: session?.accuracy ?? null,
-    };
+    const daySessions = sessions.filter(s => s.date === dateStr);
+    const best = daySessions.length ? Math.max(...daySessions.map(s => s.score)) : null;
+    return { day: format(d, 'EEE'), score: best };
   });
 
-  const completedDays = last7.filter(d => d.score !== null).length;
-  const avgScore = sessions.length
-    ? Math.round(sessions.slice(0, 7).reduce((s, r) => s + r.score, 0) / Math.min(sessions.length, 7))
+  const recent7 = sessions.slice(0, 7);
+  const avgScore = recent7.length
+    ? Math.round(recent7.reduce((s, r) => s + r.score, 0) / recent7.length)
     : 0;
+  const completedDays = last7.filter(d => d.score !== null).length;
 
-  const prevWeek = sessions.slice(7, 14);
-  const thisWeek = sessions.slice(0, 7);
-  const improvement = prevWeek.length && thisWeek.length
-    ? Math.round(
-        ((thisWeek.reduce((s, r) => s + r.avg_time, 0) / thisWeek.length) -
-         (prevWeek.reduce((s, r) => s + r.avg_time, 0) / prevWeek.length)) * -10
-      )
-    : null;
+  // Category stats
+  const catStats = CATEGORIES.map(cat => {
+    const catSessions = sessions.filter(s => s.category === cat);
+    const avgAcc = catSessions.length
+      ? Math.round(catSessions.reduce((s, r) => s + (r.accuracy || 0), 0) / catSessions.length)
+      : null;
+    const best = catSessions.length ? Math.max(...catSessions.map(s => s.score)) : null;
+    return { cat, count: catSessions.length, avgAcc, best };
+  }).filter(c => c.count > 0);
+
+  const strongest = catStats.length ? catStats.reduce((a, b) => (b.best || 0) > (a.best || 0) ? b : a) : null;
+  const weakest = catStats.length > 1 ? catStats.reduce((a, b) => (b.best || 0) < (a.best || 0) ? b : a) : null;
 
   if (loading) {
     return (
@@ -63,35 +68,46 @@ export default function Progress() {
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="min-h-screen bg-background px-5 pt-10 pb-6 overflow-y-auto"
-      {...handlers}
-    >
+    <div ref={containerRef} className="min-h-screen bg-background px-5 pt-10 pb-6 overflow-y-auto" {...handlers}>
       <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} />
+
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <h2 className="text-2xl font-grotesk font-bold text-foreground mb-1">Progress</h2>
-        <p className="text-sm text-muted-foreground mb-8">Your personal training over the last 7 days</p>
+        <p className="text-sm text-muted-foreground mb-6">Your quantitative performance over time</p>
       </motion.div>
 
       {/* Summary cards */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 gap-3 mb-8">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 gap-3 mb-6">
         <MiniStat icon={<Flame size={16} className="text-neon-orange" />} label="Streak" value={`${user?.streak_count || 0}d`} />
-        <MiniStat icon={<Target size={16} className="text-neon-purple" />} label="Avg Score" value={avgScore || '—'} />
+        <MiniStat icon={<Target size={16} className="text-neon-purple" />} label="Avg Score" value={avgScore || '—'} sub="last 7 sessions" />
         <MiniStat icon={<Zap size={16} className="text-neon-cyan" />} label="This Week" value={`${completedDays}/7`} sub="days trained" />
-        <MiniStat
-          icon={<TrendingUp size={16} className="text-emerald-400" />}
-          label="Speed Trend"
-          value={improvement !== null ? `${improvement > 0 ? '+' : ''}${improvement}%` : '—'}
-          sub={improvement !== null ? 'vs last week' : 'not enough data'}
-          highlight={improvement !== null && improvement > 0}
-        />
+        <MiniStat icon={<TrendingUp size={16} className="text-emerald-400" />} label="Total Drills" value={sessions.length} sub="all time" />
       </motion.div>
 
-      {/* Score Chart */}
+      {/* Strongest / Weakest */}
+      {(strongest || weakest) && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="grid grid-cols-2 gap-3 mb-6">
+          {strongest && (
+            <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-3">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Strongest</p>
+              <p className="text-sm font-grotesk font-bold text-emerald-400 leading-tight">{CATEGORY_LABELS[strongest.cat]}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Best: {strongest.best}/100</p>
+            </div>
+          )}
+          {weakest && (
+            <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-3">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Focus Area</p>
+              <p className="text-sm font-grotesk font-bold text-red-400 leading-tight">{CATEGORY_LABELS[weakest.cat]}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Best: {weakest.best}/100</p>
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* Score chart */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-surface-1 border border-border rounded-3xl p-5 mb-5">
-        <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-5">Score — Last 7 Days</p>
-        <ResponsiveContainer width="100%" height={160}>
+        <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-5">Best Score — Last 7 Days</p>
+        <ResponsiveContainer width="100%" height={150}>
           <BarChart data={last7} barSize={24}>
             <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: 'hsl(220 10% 50%)', fontSize: 11 }} />
             <YAxis domain={[0, 100]} hide />
@@ -104,18 +120,34 @@ export default function Progress() {
         </ResponsiveContainer>
       </motion.div>
 
+      {/* Category breakdown */}
+      {catStats.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }} className="mb-6">
+          <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-3">By Category</p>
+          <div className="space-y-2">
+            {catStats.map(({ cat, count, avgAcc, best }) => (
+              <div key={cat} className="bg-surface-2 border border-border rounded-2xl px-4 py-3 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{CATEGORY_LABELS[cat]}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{count} drill{count !== 1 ? 's' : ''}{avgAcc !== null ? ` · ${avgAcc}% avg acc` : ''}</p>
+                </div>
+                <span className="text-xl font-grotesk font-black tabular-nums text-neon-purple">{best ?? '—'}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* Recent sessions */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
         <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-3">Recent Sessions</p>
         {sessions.length === 0 ? (
           <div className="bg-surface-1 border border-border rounded-2xl p-6 text-center">
-            <p className="text-muted-foreground text-sm">No sessions yet. Start your first sprint!</p>
+            <p className="text-muted-foreground text-sm">No sessions yet. Start your first drill!</p>
           </div>
         ) : (
           <div className="space-y-2">
-            {sessions.slice(0, 10).map((s, i) => (
-              <SessionRow key={s.id || i} session={s} />
-            ))}
+            {sessions.slice(0, 10).map((s, i) => <SessionRow key={s.id || i} session={s} />)}
           </div>
         )}
       </motion.div>
@@ -137,14 +169,15 @@ function SessionRow({ session }) {
   const scoreColor = session.score >= 80 ? 'text-neon-cyan' : session.score >= 60 ? 'text-neon-purple' : 'text-neon-orange';
   const diffLabel = { easy: 'E', medium: 'M', hard: 'H' }[session.difficulty] || 'M';
   const diffColor = { easy: 'bg-emerald-500/20 text-emerald-400', medium: 'bg-primary/20 text-primary', hard: 'bg-red-500/20 text-red-400' }[session.difficulty] || '';
+  const catLabel = CATEGORY_LABELS[session.category] || '🔀 Daily Mix';
 
   return (
     <div className="bg-surface-2 border border-border rounded-2xl px-4 py-3 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg ${diffColor}`}>{diffLabel}</span>
         <div>
-          <p className="text-sm font-medium text-foreground">{session.date}</p>
-          <p className="text-xs text-muted-foreground">{session.accuracy}% accuracy · {session.avg_time}s avg</p>
+          <p className="text-sm font-medium text-foreground">{catLabel}</p>
+          <p className="text-xs text-muted-foreground">{session.date} · {session.accuracy}% acc</p>
         </div>
       </div>
       <span className={`text-xl font-grotesk font-black tabular-nums ${scoreColor}`}>{session.score}</span>

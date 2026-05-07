@@ -12,7 +12,7 @@ export default function Results() {
     return null;
   }
 
-  const { score, accuracy, avgTime, speedRating, percentile, difficulty, correct, total } = state;
+  const { score, accuracy, avgTime, speedRating, percentile, difficulty, correct, total, category } = state;
 
   const difficultyLabel = { easy: 'Easy', medium: 'Medium', hard: 'Hard' }[difficulty];
 
@@ -87,10 +87,10 @@ export default function Results() {
         className="mt-auto flex flex-col gap-3"
       >
         <button
-          onClick={() => navigate(`/drill?difficulty=${difficulty}`)}
+          onClick={() => navigate(`/drill?difficulty=${difficulty}&category=${category || 'daily'}`)}
           className="w-full bg-primary text-primary-foreground font-grotesk font-bold text-base py-4 rounded-2xl glow-purple transition-all active:scale-95 flex items-center justify-center gap-2"
         >
-          <RotateCcw size={18} /> Drill Again
+          <RotateCcw size={18} /> Train Now
         </button>
         <button
           onClick={() => navigate('/')}

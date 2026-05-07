@@ -92,7 +92,7 @@ export default function Drill() {
 
     // Navigate immediately (optimistic) — save in background
     navigate('/results', {
-      state: { score, accuracy, avgTime, speedRating, percentile, difficulty, correct, total: TOTAL_QUESTIONS },
+      state: { score, accuracy, avgTime, speedRating, percentile, difficulty, correct, total: TOTAL_QUESTIONS, category },
     });
 
     // Fire-and-forget persistence
@@ -104,6 +104,7 @@ export default function Drill() {
           accuracy,
           avg_time: avgTime,
           difficulty,
+          category,
           questions_answered: TOTAL_QUESTIONS,
           correct_count: correct,
           speed_rating: speedRating,

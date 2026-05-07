@@ -1,97 +1,123 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Zap, Trophy, BarChart2, Lock, CheckCircle2, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Check, Zap, BarChart2, Award } from 'lucide-react';
+import { Infinity as InfinityIcon } from 'lucide-react';
+import MobileHeader from '@/components/MobileHeader';
 
-const FEATURES = [
-  { icon: Zap, label: 'Unlimited daily sprints', free: false },
-  { icon: Lock, label: 'Hard difficulty mode', free: false },
-  { icon: BarChart2, label: 'Advanced analytics', free: false },
-  { icon: Trophy, label: 'Full leaderboard access', free: false },
-  { icon: CheckCircle2, label: '1 daily sprint (Free)', free: true },
-  { icon: CheckCircle2, label: 'Basic stats (Free)', free: true },
+const PLANS = [
+  { key: 'monthly',  label: 'Monthly',  price: '$9.99',  period: '/mo',   badge: null },
+  { key: 'yearly',   label: 'Yearly',   price: '$59.99', period: '/yr',   badge: 'Best Value' },
+  { key: 'lifetime', label: 'Lifetime', price: '$149',   period: 'once',  badge: null },
 ];
 
-const plans = {
-  monthly: { price: '$9.99', period: '/month', label: 'Monthly' },
-  yearly: { price: '$59.99', period: '/year', label: 'Yearly', badge: 'Save 50%' },
-  lifetime: { price: '$149', period: 'one-time', label: 'Lifetime' },
-};
+const PREMIUM_FEATURES = [
+  { icon: <Zap size={16} className="text-neon-cyan" />,        text: 'Unlimited daily drills' },
+  { icon: <Zap size={16} className="text-neon-purple" />,      text: 'All 5 categories + Hard mode' },
+  { icon: <BarChart2 size={16} className="text-neon-orange" />, text: 'Advanced performance analytics' },
+  { icon: <Award size={16} className="text-yellow-400" />,     text: 'Full achievement system' },
+];
 
-export default function Paywall() {
+export default function Paywall({ onClose }) {
   const navigate = useNavigate();
-  const [plan, setPlan] = useState('monthly');
+  const [selected, setSelected] = useState('yearly');
+
+  const handleClose = () => {
+    if (onClose) onClose();
+    else navigate(-1);
+  };
 
   return (
-    <div className="min-h-screen bg-background px-5 pt-8 pb-6 flex flex-col">
-      {/* Close */}
-      <div className="flex justify-end mb-6">
-        <button onClick={() => navigate(-1)} className="w-9 h-9 bg-surface-2 rounded-xl flex items-center justify-center border border-border">
-          <X size={16} className="text-muted-foreground" />
-        </button>
-      </div>
+    <div className="min-h-screen bg-background flex flex-col">
+      <MobileHeader title="" onBack={handleClose} />
 
-      {/* Hero */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-        <div className="w-16 h-16 mx-auto bg-primary/10 rounded-3xl flex items-center justify-center mb-4 glow-purple">
-          <Zap size={28} className="text-primary" />
-        </div>
-        <h1 className="text-2xl font-grotesk font-black text-foreground mb-2">Unlock Elite</h1>
-        <h2 className="text-2xl font-grotesk font-black text-primary mb-3">Brain Training</h2>
-        <p className="text-sm text-muted-foreground">Train without limits. Dominate the leaderboard.</p>
-      </motion.div>
+      <div className="flex-1 flex flex-col px-5 pt-2 pb-8 overflow-y-auto">
+        {/* Hero */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
+          <div className="text-5xl mb-4">🏋️</div>
+          <h1 className="text-2xl font-grotesk font-black text-foreground leading-tight mb-2">
+            Unlock Elite<br />
+            <span className="text-neon-purple">Quant Training</span>
+          </h1>
+          <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+            Train without limits. Built for GMAT, consulting, and finance candidates who take performance seriously.
+          </p>
+        </motion.div>
 
-      {/* Features */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="bg-surface-1 border border-border rounded-3xl p-5 mb-6">
-        <div className="space-y-3">
-          {FEATURES.map((f, i) => {
-            const Icon = f.icon;
-            return (
-              <div key={i} className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${!f.free ? 'bg-primary/10' : 'bg-surface-3'}`}>
-                  <Icon size={16} className={!f.free ? 'text-primary' : 'text-muted-foreground'} />
-                </div>
-                <span className={`text-sm font-medium ${!f.free ? 'text-foreground' : 'text-muted-foreground'}`}>{f.label}</span>
-                {!f.free && <CheckCircle2 size={14} className="text-neon-cyan ml-auto" />}
+        {/* Features */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="bg-surface-2 border border-border rounded-2xl px-4 py-4 mb-6 space-y-3"
+        >
+          {PREMIUM_FEATURES.map((f, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-surface-3 flex items-center justify-center shrink-0">
+                {f.icon}
               </div>
-            );
-          })}
-        </div>
-      </motion.div>
+              <span className="text-sm font-medium text-foreground">{f.text}</span>
+            </div>
+          ))}
+        </motion.div>
 
-      {/* Plan selector */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }} className="mb-6">
-        <div className="grid grid-cols-3 gap-2">
-          {Object.entries(plans).map(([key, val]) => (
+        {/* Plan selector */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          className="space-y-2.5 mb-6"
+        >
+          {PLANS.map(plan => (
             <button
-              key={key}
-              onClick={() => setPlan(key)}
-              className={`relative rounded-2xl py-4 px-2 text-center border transition-all ${
-                plan === key ? 'bg-primary/10 border-primary' : 'bg-surface-2 border-border'
+              key={plan.key}
+              onClick={() => setSelected(plan.key)}
+              className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl border transition-all no-select ${
+                selected === plan.key
+                  ? 'bg-primary/10 border-primary'
+                  : 'bg-surface-2 border-border'
               }`}
             >
-              {val.badge && (
-                <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-neon-orange text-background text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
-                  {val.badge}
-                </span>
-              )}
-              <p className="text-base font-grotesk font-bold text-foreground">{val.price}</p>
-              <p className="text-[10px] text-muted-foreground">{val.period}</p>
-              <p className="text-[10px] font-semibold mt-1 text-muted-foreground">{val.label}</p>
+              <div className="flex items-center gap-3">
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                  selected === plan.key ? 'border-primary bg-primary' : 'border-border'
+                }`}>
+                  {selected === plan.key && <Check size={11} className="text-white" />}
+                </div>
+                <span className="text-sm font-semibold text-foreground">{plan.label}</span>
+                {plan.badge && (
+                  <span className="text-[10px] font-bold text-neon-orange bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full uppercase tracking-wide">
+                    {plan.badge}
+                  </span>
+                )}
+              </div>
+              <div className="text-right">
+                <span className="text-base font-grotesk font-bold text-foreground">{plan.price}</span>
+                <span className="text-xs text-muted-foreground ml-1">{plan.period}</span>
+              </div>
             </button>
           ))}
-        </div>
-      </motion.div>
+        </motion.div>
 
-      {/* CTA */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="mt-auto">
-        <button className="w-full bg-primary text-primary-foreground font-grotesk font-bold text-lg py-5 rounded-2xl glow-purple transition-all active:scale-95 mb-3">
-          Get Elite Access — {plans[plan].price}
-        </button>
-        <p className="text-center text-xs text-muted-foreground">
-          Cancel anytime · Secure payment · Instant access
-        </p>
-      </motion.div>
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.28 }}
+          className="mt-auto"
+        >
+          <button className="w-full bg-primary text-primary-foreground font-grotesk font-bold text-base py-4 rounded-2xl glow-purple active:scale-95 transition-all no-select mb-3">
+            Train Without Limits →
+          </button>
+          <p className="text-center text-xs text-muted-foreground">
+            Cancel anytime · No ads · Secure payment
+          </p>
+        </motion.div>
+      </div>
     </div>
   );
 }
