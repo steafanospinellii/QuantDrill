@@ -1,0 +1,53 @@
+{
+  "name": "Session",
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the session"
+    },
+    "score": {
+      "type": "number",
+      "description": "Total score 0-100"
+    },
+    "accuracy": {
+      "type": "number",
+      "description": "Percentage of correct answers"
+    },
+    "avg_time": {
+      "type": "number",
+      "description": "Average response time in seconds"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "default": "medium"
+    },
+    "questions_answered": {
+      "type": "number",
+      "description": "Number of questions answered"
+    },
+    "correct_count": {
+      "type": "number",
+      "description": "Number of correct answers"
+    },
+    "speed_rating": {
+      "type": "string",
+      "description": "Speed label e.g. Lightning, Fast, Average"
+    },
+    "percentile": {
+      "type": "number",
+      "description": "Simulated percentile ranking"
+    }
+  },
+  "required": [
+    "date",
+    "score",
+    "difficulty"
+  ]
+}
