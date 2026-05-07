@@ -10,8 +10,7 @@ import Home from '@/pages/Home';
 import Drill from '@/pages/Drill';
 import Results from '@/pages/Results';
 import Progress from '@/pages/Progress';
-import Leaderboard from '@/pages/Leaderboard';
-import Paywall from '@/pages/Paywall';
+import Badges from '@/pages/Badges';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -38,8 +37,7 @@ const AuthenticatedApp = () => {
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/progress" element={<Progress />} />
-        <Route path="/leaderboard" element={<Leaderboard />} />
-        <Route path="/paywall" element={<Paywall />} />
+        <Route path="/badges" element={<Badges />} />
       </Route>
       <Route path="/drill" element={<Drill />} />
       <Route path="/results" element={<Results />} />

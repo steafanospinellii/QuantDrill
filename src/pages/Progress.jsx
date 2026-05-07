@@ -63,7 +63,7 @@ export default function Progress() {
     <div className="min-h-screen bg-background px-5 pt-10 pb-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <h2 className="text-2xl font-grotesk font-bold text-foreground mb-1">Progress</h2>
-        <p className="text-sm text-muted-foreground mb-8">Your training over the last 7 days</p>
+        <p className="text-sm text-muted-foreground mb-8">Your personal training over the last 7 days</p>
       </motion.div>
 
       {/* Summary cards */}

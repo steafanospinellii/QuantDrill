@@ -1,10 +1,10 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, BarChart2, Trophy, Zap } from 'lucide-react';
+import { Home, BarChart2, Award } from 'lucide-react';
 
 const navItems = [
   { path: '/', icon: Home, label: 'Home' },
   { path: '/progress', icon: BarChart2, label: 'Progress' },
-  { path: '/leaderboard', icon: Trophy, label: 'Ranks' },
+  { path: '/badges', icon: Award, label: 'Badges' },
 ];
 
 export default function Layout() {

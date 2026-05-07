@@ -33,7 +33,7 @@ export default function Results() {
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className="flex flex-col items-center mb-10"
       >
-        <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-4">Sprint Complete</p>
+        <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-4">Drill Complete</p>
         <div className={`relative w-36 h-36 rounded-full bg-surface-2 border-2 border-border ${scoreGlow} flex items-center justify-center mb-5`}>
           <div className="text-center">
             <span className={`text-5xl font-grotesk font-black tabular-nums ${scoreColor}`}>{score}</span>
@@ -87,7 +87,7 @@ export default function Results() {
           onClick={() => navigate(`/drill?difficulty=${difficulty}`)}
           className="w-full bg-primary text-primary-foreground font-grotesk font-bold text-base py-4 rounded-2xl glow-purple transition-all active:scale-95 flex items-center justify-center gap-2"
         >
-          <RotateCcw size={18} /> Try Again
+          <RotateCcw size={18} /> Drill Again
         </button>
         <button
           onClick={() => navigate('/')}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { Flame, Zap, Trophy, ChevronRight, Lock, Star } from 'lucide-react';
+import { Flame, Zap, Award, ChevronRight, Lock, Star } from 'lucide-react';
 import { hasCompletedTodaysSprint, isStreakAlive } from '@/lib/streakUtils';
 
 export default function Home() {
@@ -19,11 +19,8 @@ export default function Home() {
         setUser(u);
         const s = await base44.entities.Session.list('-created_date', 7);
         setSessions(s);
-      } catch (e) {
-        // not logged in or new user
-      } finally {
-        setLoading(false);
-      }
+      } catch (e) {}
+      finally { setLoading(false); }
     }
     load();
   }, []);
@@ -41,10 +38,6 @@ export default function Home() {
     { key: 'hard', label: 'Hard', desc: '8s timer', premium: true },
   ];
 
-  const handleStart = () => {
-    navigate(`/drill?difficulty=${difficulty}`);
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -60,13 +53,13 @@ export default function Home() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-grotesk font-bold text-foreground tracking-tight">
-              Brain<span className="text-neon-purple">Sprint</span>
+              Quant<span className="text-neon-purple">Drill</span>
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5 tracking-wide">PERFORMANCE LAB</p>
           </div>
-          <Link to="/leaderboard">
+          <Link to="/badges">
             <div className="w-9 h-9 bg-surface-2 rounded-xl flex items-center justify-center border border-border hover:border-primary transition-colors">
-              <Trophy size={16} className="text-muted-foreground" />
+              <Award size={16} className="text-muted-foreground" />
             </div>
           </Link>
         </div>
@@ -109,7 +102,7 @@ export default function Home() {
             <Zap size={16} className="text-neon-cyan" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-foreground">Sprint Complete!</p>
+            <p className="text-sm font-semibold text-foreground">Drill Complete!</p>
             <p className="text-xs text-muted-foreground">You've trained today. Keep the streak alive.</p>
           </div>
         </motion.div>
@@ -149,16 +142,16 @@ export default function Home() {
         className="mt-auto"
       >
         <button
-          onClick={handleStart}
+          onClick={() => navigate(`/drill?difficulty=${difficulty}`)}
           className="w-full bg-primary text-primary-foreground font-grotesk font-bold text-lg py-5 rounded-2xl glow-purple transition-all duration-200 active:scale-95 flex items-center justify-center gap-3"
         >
           <Zap size={22} />
-          {completedToday ? 'Start Another Sprint' : 'Start Daily Sprint'}
+          {completedToday ? 'Start Another Drill' : 'Start Daily Drill'}
           <ChevronRight size={20} />
         </button>
 
         <p className="text-center text-xs text-muted-foreground mt-4">
-          10 questions · ~3 minutes · Score 100
+          10 questions · ~3 minutes · Score 0–100
         </p>
       </motion.div>
     </div>
