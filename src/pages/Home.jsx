@@ -58,7 +58,7 @@ export default function Home() {
             <h1 className="text-2xl font-grotesk font-bold text-foreground tracking-tight">
               Quant<span className="text-neon-purple">Drill</span>
             </h1>
-            <p className="text-xs text-muted-foreground mt-0.5 tracking-wide">PERFORMANCE LAB</p>
+
           </div>
           <button
             onClick={() => setSettingsOpen(true)}
