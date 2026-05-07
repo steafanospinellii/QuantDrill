@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { getAllBadges, computeStats } from '@/lib/badges';
+import { BADGES, computeBadgeStats } from '@/lib/badges';
 
 export default function Badges() {
   const [sessions, setSessions] = useState([]);
@@ -26,8 +26,8 @@ export default function Badges() {
     );
   }
 
-  const stats = computeStats(user, sessions);
-  const badges = getAllBadges();
+  const stats = computeBadgeStats(sessions, user);
+  const badges = BADGES;
   const unlocked = badges.filter(b => b.check(stats));
   const locked = badges.filter(b => !b.check(stats));
 
