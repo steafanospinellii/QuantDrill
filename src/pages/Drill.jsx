@@ -1,183 +1,218 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Zap } from 'lucide-react';
-import { generateQuestion, calculateScore, getSpeedRating, getPercentile } from '@/lib/questionGenerator';
+import { base44 } from '@/api/base44Client';
+import { generateSession, checkAnswer, getTimerSeconds, calculateScore, getSpeedRating, getPercentile } from '@/lib/questionGenerator';
+import { calculateNewStreak, getTodayDate } from '@/lib/streakUtils';
 import TimerRing from '@/components/drill/TimerRing';
 import QuestionCard from '@/components/drill/QuestionCard';
+import { ArrowRight } from 'lucide-react';
+import MobileHeader from '@/components/MobileHeader';
 
-const TIMER_DURATIONS = { easy: 15, medium: 12, hard: 8 };
-const QUESTIONS_PER_SESSION = 10;
+const TOTAL_QUESTIONS = 10;
 
 export default function Drill() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const difficulty = searchParams.get('difficulty') || 'medium';
-  const category = searchParams.get('category') || 'daily';
+  const urlParams = new URLSearchParams(window.location.search);
+  const difficulty = urlParams.get('difficulty') || 'medium';
+  const category = urlParams.get('category') || 'daily';
+  const timerSeconds = getTimerSeconds(difficulty);
 
-  const [questions, setQuestions] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState([]);
-  const [selected, setSelected] = useState(null);
+  const [questions] = useState(() => generateSession(difficulty, TOTAL_QUESTIONS, category));
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [answer, setAnswer] = useState('');
+  const [results, setResults] = useState([]);
+  const [phase, setPhase] = useState('question'); // question | feedback
+  const [isCorrect, setIsCorrect] = useState(null);
+  const [startTime, setStartTime] = useState(Date.now());
   const [timerKey, setTimerKey] = useState(0);
-  const [sessionStart] = useState(Date.now());
-  const [saving, setSaving] = useState(false);
+  const [shake, setShake] = useState(false);
+  const inputRef = useRef(null);
+
+  const currentQ = questions[currentIdx];
 
   useEffect(() => {
-    const qs = [];
-    for (let i = 0; i < QUESTIONS_PER_SESSION; i++) {
-      qs.push(generateQuestion(difficulty, category));
-    }
-    setQuestions(qs);
-  }, []);
+    setStartTime(Date.now());
+    setAnswer('');
+    setPhase('question');
+    setTimerKey(k => k + 1);
+    setTimeout(() => inputRef.current?.focus(), 100);
+  }, [currentIdx]);
 
-  const timerDuration = TIMER_DURATIONS[difficulty] || 12;
-  const currentQuestion = questions[currentIndex];
+  const submitAnswer = useCallback((userAnswer) => {
+    if (phase !== 'question') return;
+    const timeTaken = (Date.now() - startTime) / 1000;
+    const correct = checkAnswer(userAnswer, currentQ.correct_answer);
+    setIsCorrect(correct);
+    setPhase('feedback');
 
-  const handleAnswer = (option, timeLeft) => {
-    if (selected !== null) return;
-    setSelected(option);
+    const result = {
+      correct,
+      timeTaken,
+      timeLimit: timerSeconds,
+      answer: userAnswer,
+      correctAnswer: currentQ.correct_answer,
+    };
 
-    const isCorrect = option === currentQuestion?.correct;
-    const timeTaken = timerDuration - timeLeft;
+    const newResults = [...results, result];
 
     setTimeout(() => {
-      const newAnswers = [...answers, { isCorrect, timeTaken, option }];
-      if (currentIndex + 1 >= QUESTIONS_PER_SESSION) {
-        finishSession(newAnswers);
+      if (currentIdx < TOTAL_QUESTIONS - 1) {
+        setResults(newResults);
+        setCurrentIdx(i => i + 1);
+        setPhase('question');
       } else {
-        setAnswers(newAnswers);
-        setCurrentIndex(i => i + 1);
-        setSelected(null);
-        setTimerKey(k => k + 1);
+        finishSession(newResults);
       }
     }, 600);
+  }, [phase, currentIdx, results, startTime, timerSeconds, currentQ]);
+
+  const handleTimerExpire = useCallback(() => {
+    submitAnswer('');
+  }, [submitAnswer]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!answer.trim()) {
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      return;
+    }
+    submitAnswer(answer);
   };
 
-  const handleExpire = () => {
-    handleAnswer(null, 0);
-  };
-
-  const finishSession = async (finalAnswers) => {
-    setSaving(true);
-    const correctCount = finalAnswers.filter(a => a.isCorrect).length;
-    const avgTime = finalAnswers.reduce((s, a) => s + (a.timeTaken || 0), 0) / finalAnswers.length;
-    const accuracy = Math.round((correctCount / finalAnswers.length) * 100);
-    const score = calculateScore(finalAnswers.map(a => ({ correct: a.isCorrect, timeTaken: a.timeTaken, timeLimit: 12 })), difficulty);
+  const finishSession = async (finalResults) => {
+    const score = calculateScore(finalResults, difficulty);
+    const correct = finalResults.filter(r => r.correct).length;
+    const accuracy = Math.round((correct / TOTAL_QUESTIONS) * 100);
+    const avgTime = parseFloat((finalResults.reduce((s, r) => s + r.timeTaken, 0) / finalResults.length).toFixed(1));
     const speedRating = getSpeedRating(avgTime, difficulty);
     const percentile = getPercentile(score, difficulty);
-    const result = { score, accuracy, avgTime, correctCount, speedRating, percentile };
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayDate();
 
-    try {
-      await base44.entities.Session.create({
-        date: today,
-        score: result.score,
-        accuracy: result.accuracy,
-        avg_time: result.avgTime,
-        difficulty,
-        category,
-        questions_answered: QUESTIONS_PER_SESSION,
-        correct_count: result.correctCount,
-        speed_rating: result.speedRating,
-        percentile: result.percentile,
-      });
+    // Navigate immediately (optimistic) — save in background
+    navigate('/results', {
+      state: { score, accuracy, avgTime, speedRating, percentile, difficulty, correct, total: TOTAL_QUESTIONS },
+    });
 
-      const user = await base44.auth.me();
-      const lastActive = user?.last_active_date;
-      const isNewDay = lastActive !== today;
+    // Fire-and-forget persistence
+    (async () => {
+      try {
+        await base44.entities.Session.create({
+          date: today,
+          score,
+          accuracy,
+          avg_time: avgTime,
+          difficulty,
+          questions_answered: TOTAL_QUESTIONS,
+          correct_count: correct,
+          speed_rating: speedRating,
+          percentile,
+        });
 
-      let streakCount = user?.streak_count || 0;
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-      if (isNewDay) {
-        streakCount = (lastActive === yesterdayStr || lastActive === today) ? streakCount + 1 : 1;
-        await base44.auth.updateMe({ last_active_date: today, streak_count: streakCount });
+        const user = await base44.auth.me();
+        const newStreak = calculateNewStreak(user.streak_count || 0, user.last_active_date);
+        await base44.auth.updateMe({
+          streak_count: newStreak,
+          last_active_date: today,
+        });
+      } catch (e) {
+        console.error('Could not save session:', e);
       }
-    } catch (e) {}
-
-    navigate(`/results?score=${Math.round(result.score)}&accuracy=${Math.round(result.accuracy)}&difficulty=${difficulty}&category=${category}`);
+    })();
   };
 
-  if (questions.length === 0) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  const progress = ((currentIndex) / QUESTIONS_PER_SESSION) * 100;
-
   return (
-    <div className="min-h-screen bg-background flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4">
-        <button
-          onClick={() => navigate('/')}
-          className="w-9 h-9 bg-surface-2 rounded-xl flex items-center justify-center border border-border no-select"
-        >
-          <X size={16} className="text-muted-foreground" />
-        </button>
-        <div className="flex items-center gap-2">
-          <Zap size={14} className="text-neon-cyan" />
-          <span className="text-sm font-semibold text-foreground tabular-nums">
-            {currentIndex + 1} / {QUESTIONS_PER_SESSION}
-          </span>
-        </div>
-        <div className="w-9" />
-      </div>
+    <div className="min-h-screen bg-background flex flex-col pb-6">
+      <MobileHeader title="Drill" onBack={() => navigate('/')} />
 
-      {/* Progress bar */}
-      <div className="mx-5 h-1 bg-surface-2 rounded-full overflow-hidden">
-        <motion.div
-          className="h-full bg-primary rounded-full"
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.3 }}
-        />
+      {/* Progress + counter row */}
+      <div className="flex items-center justify-between px-5 mt-5 mb-6">
+        <div className="flex gap-1.5">
+          {questions.map((_, i) => (
+            <div
+              key={i}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i < currentIdx
+                  ? 'bg-primary w-4'
+                  : i === currentIdx
+                  ? 'bg-primary/60 w-4'
+                  : 'bg-surface-3 w-1.5'
+              }`}
+            />
+          ))}
+        </div>
+        <span className="text-sm font-grotesk font-semibold text-muted-foreground tabular-nums">
+          {currentIdx + 1}<span className="text-muted-foreground/40">/{TOTAL_QUESTIONS}</span>
+        </span>
       </div>
 
       {/* Timer */}
-      <div className="flex justify-center mt-8 mb-6">
+      <div className="flex justify-center px-5 mb-8">
         <TimerRing
           key={timerKey}
-          duration={timerDuration}
-          onExpire={handleExpire}
-          active={selected === null}
+          duration={timerSeconds}
+          onExpire={handleTimerExpire}
+          isActive={phase === 'question'}
         />
       </div>
 
       {/* Question */}
-      <div className="flex-1 px-5 flex flex-col gap-5">
-        <AnimatePresence mode="wait">
-          <QuestionCard key={currentIndex} question={currentQuestion} />
+      <div className="flex-1 flex flex-col px-5">
+        <div className="bg-surface-1 border border-border rounded-3xl p-6 mb-6 min-h-[140px] flex items-center">
+          <AnimatePresence mode="wait">
+            <QuestionCard
+              key={currentIdx}
+              question={currentQ}
+              questionNumber={currentIdx + 1}
+              total={TOTAL_QUESTIONS}
+            />
+          </AnimatePresence>
+        </div>
+
+        {/* Feedback overlay */}
+        <AnimatePresence>
+          {phase === 'feedback' && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className={`mb-4 rounded-2xl px-4 py-3 text-center ${
+                isCorrect
+                  ? 'bg-emerald-500/10 border border-emerald-500/30'
+                  : 'bg-red-500/10 border border-red-500/30'
+              }`}
+            >
+              <p className={`font-grotesk font-bold text-lg ${isCorrect ? 'text-emerald-400' : 'text-red-400'}`}>
+                {isCorrect ? '✓ Correct!' : `✗ Answer: ${currentQ.correct_answer}`}
+              </p>
+            </motion.div>
+          )}
         </AnimatePresence>
 
-        {/* Options */}
-        <div className="grid grid-cols-2 gap-3">
-          {currentQuestion?.options?.map((opt, i) => {
-            const isSelected = selected === opt;
-            const isCorrect = opt === currentQuestion.correct;
-            let bg = 'bg-surface-2 border-border';
-            if (isSelected && isCorrect) bg = 'bg-green-500/20 border-green-500';
-            else if (isSelected && !isCorrect) bg = 'bg-red-500/20 border-red-500 animate-shake';
-            else if (selected !== null && isCorrect) bg = 'bg-green-500/10 border-green-500/50';
-
-            return (
-              <button
-                key={i}
-                onClick={() => handleAnswer(opt, 0)}
-                disabled={selected !== null}
-                className={`border rounded-2xl px-4 py-4 text-center text-sm font-semibold text-foreground transition-all no-select ${bg}`}
-              >
-                {opt}
-              </button>
-            );
-          })}
-        </div>
+        {/* Answer input */}
+        <form onSubmit={handleSubmit} className="mt-auto">
+          <div className={`relative ${shake ? 'animate-shake' : ''}`}>
+            <input
+              ref={inputRef}
+              type="number"
+              inputMode="numeric"
+              value={answer}
+              onChange={e => setAnswer(e.target.value)}
+              disabled={phase === 'feedback'}
+              placeholder="Your answer..."
+              className="w-full bg-surface-2 border border-border rounded-2xl px-5 py-4 text-xl font-grotesk font-semibold text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
+            />
+            <button
+              type="submit"
+              disabled={phase === 'feedback' || !answer.trim()}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-primary rounded-xl flex items-center justify-center disabled:opacity-30 transition-opacity"
+            >
+              <ArrowRight size={18} className="text-primary-foreground" />
+            </button>
+          </div>
+          <p className="text-center text-xs text-muted-foreground mt-3">Press Enter or tap → to submit</p>
+        </form>
       </div>
     </div>
   );
