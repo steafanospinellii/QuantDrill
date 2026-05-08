@@ -88,7 +88,7 @@ export default function BenchmarkMetrics({ sessions }) {
         <RingCard
           label="5-Session Speed"
           value={`${avgSpeed}s`}
-          sub={hasData ? <>Top <span className="font-bold text-neon-purple">{speedPct}%</span> of candidates</> : null}
+          sub={hasData ? <>You are among the top <span className="font-bold text-neon-purple">{speedPct}%</span> of candidates</> : null}
           progress={speedProgress}
           ringColor="hsl(262 83% 68%)"
           delay={0.1}
