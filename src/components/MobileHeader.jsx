@@ -20,10 +20,11 @@ export default function MobileHeader({ title, onBack }) {
         minHeight: 'calc(44px + env(safe-area-inset-top, 0px))',
       }}
     >
-      {/* Back button — pinned to bottom-left of the bar */}
+      {/* Back button — spans full height so entire left area is tappable */}
       <button
         onClick={handleBack}
-        className="absolute left-0 bottom-0 flex items-center gap-0.5 px-3 py-3 text-primary no-select active:opacity-60 transition-opacity"
+        className="absolute inset-y-0 left-0 flex items-end gap-0.5 px-3 pb-3 text-primary no-select active:opacity-60 transition-opacity"
+        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
       >
         <ChevronLeft size={22} strokeWidth={2.5} />
         <span className="text-sm font-medium">Back</span>
