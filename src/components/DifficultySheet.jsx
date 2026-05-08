@@ -70,7 +70,6 @@ export default function DifficultySheet({ open, value, onClose, category, onStar
               </div>
 
               {/* Difficulty */}
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mb-2.5">Difficulty</p>
               <div className="space-y-2 mb-6">
                 {DIFFICULTIES.map(opt => (
                   <button
@@ -115,9 +114,7 @@ export default function DifficultySheet({ open, value, onClose, category, onStar
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-muted-foreground text-center mt-3">
-                Tap a duration to start immediately
-              </p>
+
             </div>
           </motion.div>
         </>
