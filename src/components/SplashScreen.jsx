@@ -4,26 +4,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 const SESSION_KEY = 'qd_splash_shown';
 
 export default function SplashScreen({ onDone }) {
-  const [visible, setVisible] = useState(() => !sessionStorage.getItem(SESSION_KEY));
+  const alreadyShown = sessionStorage.getItem(SESSION_KEY);
+  const [visible, setVisible] = useState(!alreadyShown);
 
   useEffect(() => {
-    if (!visible) {
+    if (alreadyShown) {
       onDone();
       return;
     }
     sessionStorage.setItem(SESSION_KEY, '1');
-    // fade in 0.4s, hold 1.2s, fade out 0.4s
-    const timer = setTimeout(() => {
-      setVisible(false);
-    }, 400 + 1200); // start fade-out after hold
-
+    // hold = fade-in(0.4s) + hold(1.2s) = 1600ms before starting fade-out
+    const timer = setTimeout(() => setVisible(false), 1600);
     return () => clearTimeout(timer);
   }, []);
-
-  if (!visible && sessionStorage.getItem(SESSION_KEY)) {
-    // Already shown this session — skip entirely
-    return null;
-  }
 
   return (
     <AnimatePresence onExitComplete={onDone}>
@@ -40,7 +33,8 @@ export default function SplashScreen({ onDone }) {
           <img
             src="https://media.base44.com/images/public/69fcb12caee6ab9a4c226c8f/aa9e7382c_Untitleddesign1.png"
             alt="QuantDrill"
-            style={{ width: 160, height: 'auto' }}
+            width={160}
+            style={{ height: 'auto', display: 'block' }}
             draggable={false}
           />
         </motion.div>
