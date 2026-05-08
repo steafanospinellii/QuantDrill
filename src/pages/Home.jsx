@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { Flame, Zap, Star, Settings, ChevronRight, Lock } from 'lucide-react';
+import { Flame, Zap, Settings, ChevronRight, Lock } from 'lucide-react';
 import { hasCompletedTodaysSprint, isStreakAlive } from '@/lib/streakUtils';
 import SettingsModal from '@/components/SettingsModal';
 import DifficultySheet from '@/components/DifficultySheet';
 import CategoryCards from '@/components/CategoryCards';
 import { getDrillAccess, FREE_DAILY_LIMIT } from '@/lib/freemium';
+import BenchmarkMetrics from '@/components/BenchmarkMetrics';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -30,13 +31,9 @@ export default function Home() {
     load();
   }, []);
 
-  const streak = user?.streak_count || 0;
   const lastActive = user?.last_active_date;
   const streakAlive = isStreakAlive(lastActive);
   const completedToday = hasCompletedTodaysSprint(lastActive);
-  const lastSession = sessions[0];
-  const lastScore = lastSession?.score ?? null;
-  const totalDrills = sessions.length;
   const { allowed: drillAllowed, remaining, isPremium } = getDrillAccess(sessions, user);
 
   if (loading) {
@@ -67,33 +64,8 @@ export default function Home() {
         </div>
       </motion.div>
 
-      {/* ── Stats Row ── */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
-        <div className="grid grid-cols-3 gap-3">
-          <StatCard
-            label="Streak"
-            value={streak}
-            unit="days"
-            icon={<Flame size={16} className={streakAlive ? 'text-neon-orange' : 'text-muted-foreground'} />}
-            highlight={streakAlive}
-            color="orange"
-          />
-          <StatCard
-            label="Last Score"
-            value={lastScore !== null ? lastScore : '—'}
-            unit={lastScore !== null ? '/100' : ''}
-            icon={<Star size={16} className="text-neon-purple" />}
-            color="purple"
-          />
-          <StatCard
-            label="Total Drills"
-            value={totalDrills}
-            unit="sessions"
-            icon={<Zap size={16} className="text-neon-cyan" />}
-            color="cyan"
-          />
-        </div>
-      </motion.div>
+      {/* ── Benchmark Metrics ── */}
+      <BenchmarkMetrics sessions={sessions} />
 
       {/* ── Completed today banner ── */}
       {completedToday && (
@@ -160,22 +132,6 @@ export default function Home() {
           navigate(`/drill?difficulty=${difficulty}&category=${category}&duration=${duration}`);
         }}
       />
-    </div>
-  );
-}
-
-function StatCard({ label, value, unit, icon, highlight, color }) {
-  const glowClass = highlight
-    ? color === 'orange' ? 'border-orange-500/30 bg-orange-500/5'
-    : color === 'purple' ? 'border-primary/30 bg-primary/5'
-    : 'border-neon-cyan/30 bg-neon-cyan/5'
-    : 'border-border bg-surface-2';
-
-  return (
-    <div className={`rounded-2xl p-3 border ${glowClass} transition-all`}>
-      <div className="flex items-center gap-1.5 mb-2">{icon}<span className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</span></div>
-      <p className="text-xl font-grotesk font-bold text-foreground tabular-nums leading-none">{value}</p>
-      {unit && <p className="text-[10px] text-muted-foreground mt-0.5">{unit}</p>}
     </div>
   );
 }
