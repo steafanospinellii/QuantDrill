@@ -187,7 +187,7 @@ export default function Drill() {
           <div className={`relative transition-colors duration-150 rounded-2xl ${borderClass} ${shake ? 'animate-shake' : ''}`}>
             <input
               ref={inputRef}
-              type="number"
+              type="text"
               inputMode="numeric"
               value={answer}
               onChange={handleChange}
@@ -196,9 +196,7 @@ export default function Drill() {
               className="w-full bg-transparent rounded-2xl px-5 py-4 text-xl font-grotesk font-semibold text-foreground placeholder:text-muted-foreground/40 focus:outline-none border-none"
             />
           </div>
-          <p className="text-center text-[11px] text-muted-foreground mt-3">
-            Correct → auto-advance · Enter → skip
-          </p>
+
         </form>
       </div>
     </div>
