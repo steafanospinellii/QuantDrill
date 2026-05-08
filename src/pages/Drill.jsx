@@ -7,7 +7,7 @@ import { calculateNewStreak, getTodayDate } from '@/lib/streakUtils';
 import GlobalTimer from '@/components/drill/GlobalTimer';
 import QuestionCard from '@/components/drill/QuestionCard';
 import MobileHeader from '@/components/MobileHeader';
-import { CheckCircle2 } from 'lucide-react';
+
 
 export default function Drill() {
   const navigate = useNavigate();
@@ -167,20 +167,18 @@ export default function Drill() {
           </AnimatePresence>
         </div>
 
-        {/* Correct-answer overlay */}
+        {/* Correct-answer flash banner */}
         <AnimatePresence>
           {flash === 'correct' && (
             <motion.div
-              key="correct-overlay"
-              initial={{ opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.1 }}
-              transition={{ type: 'spring', damping: 18, stiffness: 320 }}
-              className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none"
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="mb-4 rounded-2xl px-4 py-3 text-center bg-emerald-500/10 border border-emerald-500/30"
             >
-              <div className="bg-emerald-500/90 rounded-full p-5 shadow-xl shadow-emerald-500/30">
-                <CheckCircle2 size={52} className="text-white" strokeWidth={2} />
-              </div>
+              <p className="font-grotesk font-bold text-base text-emerald-400">
+                ✓ Correct
+              </p>
             </motion.div>
           )}
         </AnimatePresence>
