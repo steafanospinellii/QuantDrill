@@ -50,7 +50,6 @@ const AuthenticatedApp = () => {
         <Route path="/drill" element={<PageTransition><Drill /></PageTransition>} />
         <Route path="/results" element={<PageTransition><Results /></PageTransition>} />
         <Route path="/paywall" element={<PageTransition><Paywall /></PageTransition>} />
-        <Route path="/success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </AnimatePresence>
@@ -66,7 +65,10 @@ function App() {
         <SplashScreen onDone={() => setSplashDone(true)} />
         {splashDone && (
           <Router>
-            <AuthenticatedApp />
+            <Routes>
+              <Route path="/success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
+              <Route path="*" element={<AuthenticatedApp />} />
+            </Routes>
           </Router>
         )}
         <Toaster />
