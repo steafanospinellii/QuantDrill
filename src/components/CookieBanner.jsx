@@ -33,18 +33,12 @@ export default function CookieBanner() {
     marketing: false,
   });
 
-  // Check consent state on mount
+  // Check consent state on mount - only show banner if no consent exists
   useEffect(() => {
     const existing = getConsentState();
-    if (existing) {
-      // User already gave consent
-      setPreferences(existing);
-      setShowBanner(false);
-      setShowModal(false);
-    } else {
-      // No consent yet, show banner
+    if (!existing) {
+      // No consent saved yet, show banner
       setShowBanner(true);
-      setShowModal(false);
     }
   }, []);
 
@@ -81,9 +75,13 @@ export default function CookieBanner() {
     }));
   };
 
+  const closeModalOnly = () => {
+    setShowModal(false);
+  };
+
   return (
     <AnimatePresence mode="wait">
-      {/* Main Banner — shows first for new users */}
+      {/* Main Banner — shows only on first visit when no consent exists */}
       {showBanner && !showModal && (
         <motion.div
           key="banner"
@@ -143,7 +141,7 @@ export default function CookieBanner() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowModal(false)}
+            onClick={closeModalOnly}
             className="fixed inset-0 bg-black/60 z-50"
           />
           <motion.div
@@ -159,7 +157,7 @@ export default function CookieBanner() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-grotesk font-bold text-foreground">Cookie Preferences</h2>
                 <button
-                  onClick={() => setShowModal(false)}
+                  onClick={closeModalOnly}
                   className="w-7 h-7 bg-surface-2 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground no-select transition-colors"
                 >
                   <X size={16} />
@@ -198,7 +196,7 @@ export default function CookieBanner() {
                 ))}
               </div>
 
-              {/* Buttons */}
+              {/* Buttons — Save My Preferences, Reject All, Accept All */}
               <div className="flex flex-col gap-3 mb-4">
                 <button
                   onClick={handleRejectAll}
