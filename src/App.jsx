@@ -18,14 +18,9 @@ import Badges from '@/pages/Badges';
 import Paywall from '@/pages/Paywall';
 import PaymentSuccess from '@/pages/PaymentSuccess';
 
-const AppRoutes = () => {
+const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
   const location = useLocation();
-
-  // /success is always public — no auth gate
-  if (location.pathname === '/success') {
-    return <PaymentSuccess />;
-  }
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -70,7 +65,10 @@ function App() {
         <SplashScreen onDone={() => setSplashDone(true)} />
         {splashDone && (
           <Router>
-            <AppRoutes />
+            <Routes>
+              <Route path="/success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
+              <Route path="*" element={<AuthenticatedApp />} />
+            </Routes>
           </Router>
         )}
         <Toaster />
