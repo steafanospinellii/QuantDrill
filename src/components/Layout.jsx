@@ -5,7 +5,7 @@ import { AnimatePresence } from 'framer-motion';
 import PageTransition from './PageTransition';
 
 const navItems = [
-  { path: '/', icon: Home, label: 'Home' },
+  { path: '/home', icon: Home, label: 'Home' },
   { path: '/progress', icon: BarChart2, label: 'Progress' },
   { path: '/badges', icon: Award, label: 'Badges' },
 ];

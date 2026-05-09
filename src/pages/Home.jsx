@@ -10,6 +10,7 @@ import CategoryCards from '@/components/CategoryCards';
 import { getDrillAccess } from '@/lib/freemium';
 import BenchmarkMetrics from '@/components/BenchmarkMetrics';
 import DailyLimitModal from '@/components/DailyLimitModal';
+import LoginScreen from '@/components/LoginScreen';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ export default function Home() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [diffSheetOpen, setDiffSheetOpen] = useState(false);
   const [limitModalOpen, setLimitModalOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [pendingDrillSettings, setPendingDrillSettings] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -125,18 +128,44 @@ export default function Home() {
 
       {/* ── Focused Practice ── */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.28 }}>
-        <CategoryCards difficulty="medium" isPremium={isPremium} />
+        <CategoryCards
+        difficulty="medium"
+        isPremium={isPremium}
+        onNeedsAuth={!user ? (settings) => {
+          setPendingDrillSettings(settings);
+          setLoginModalOpen(true);
+        } : undefined}
+      />
       </motion.div>
 
       {/* ── Modals ── */}
       <DailyLimitModal open={limitModalOpen} onClose={() => setLimitModalOpen(false)} />
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      {loginModalOpen && (
+        <LoginScreen
+          onAuthenticated={async () => {
+            await base44.auth.me().catch(() => {});
+            setLoginModalOpen(false);
+            if (pendingDrillSettings) {
+              const { difficulty, duration, category } = pendingDrillSettings;
+              setPendingDrillSettings(null);
+              navigate(`/drill?difficulty=${difficulty}&category=${category}&duration=${duration}`);
+            }
+          }}
+        />
+      )}
+
       <DifficultySheet
         open={diffSheetOpen}
         value="medium"
         category="daily"
         isPremium={isPremium}
         onClose={() => setDiffSheetOpen(false)}
+        onNeedsAuth={!user ? (settings) => {
+          setDiffSheetOpen(false);
+          setPendingDrillSettings(settings);
+          setLoginModalOpen(true);
+        } : undefined}
         onStart={({ difficulty, duration, category }) => {
           navigate(`/drill?difficulty=${difficulty}&category=${category}&duration=${duration}`);
         }}

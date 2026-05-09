@@ -152,7 +152,7 @@ export default function LoginScreen({ onAuthenticated }) {
                   <h1 className="text-4xl font-grotesk font-black" style={{ color: '#fff' }}>
                     Quant<span style={{ color: '#9B6FE8' }}>Drill</span>
                   </h1>
-                  <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.45)' }}>Train like the top 1%</p>
+                  <p className="text-sm mt-2 leading-relaxed max-w-[260px] text-center" style={{ color: 'rgba(255,255,255,0.45)' }}>Train like the top 1% of candidates and master the fast math skills needed for MBB, IB, GMAT & GRE</p>
                 </div>
               </div>
 

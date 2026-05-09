@@ -14,12 +14,17 @@ const DURATIONS = [
   { minutes: 10, label: '10 min' },
 ];
 
-export default function DifficultySheet({ open, value, onClose, category, onStart, isPremium }) {
+export default function DifficultySheet({ open, value, onClose, category, onStart, onNeedsAuth, isPremium }) {
   const [difficulty, setDifficulty] = useState(value || 'medium');
   const [duration, setDuration] = useState(null);
 
   const handleStart = () => {
     if (!duration) return;
+    if (onNeedsAuth) {
+      // caller will handle auth then call onStart
+      onNeedsAuth({ difficulty, duration, category });
+      return;
+    }
     onClose();
     onStart({ difficulty, duration, category });
   };

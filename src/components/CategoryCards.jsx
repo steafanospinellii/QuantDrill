@@ -12,7 +12,7 @@ const CATEGORIES = [
   { key: 'market_sizing',      emoji: '🌍', label: 'Market Sizing',     sub: 'Estimation cases',     premium: true },
 ];
 
-export default function CategoryCards({ difficulty, isPremium }) {
+export default function CategoryCards({ difficulty, isPremium, onNeedsAuth }) {
   const navigate = useNavigate();
   const [sheetCategory, setSheetCategory] = useState(null);
 
@@ -60,6 +60,10 @@ export default function CategoryCards({ difficulty, isPremium }) {
         value={difficulty}
         category={sheetCategory}
         onClose={() => setSheetCategory(null)}
+        onNeedsAuth={onNeedsAuth ? (settings) => {
+          setSheetCategory(null);
+          onNeedsAuth(settings);
+        } : undefined}
         onStart={({ difficulty: d, duration, category }) => {
           setSheetCategory(null);
           navigate(`/drill?difficulty=${d}&category=${category}&duration=${duration}`);
