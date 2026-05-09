@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { getSessionsForUser } from '@/lib/querySafety';
 import { motion } from 'framer-motion';
 import { Flame, Zap, Settings, ChevronRight } from 'lucide-react';
-import { hasCompletedTodaysSprint, isStreakAlive } from '@/lib/streakUtils';
+import { isStreakAlive, getTodayDate } from '@/lib/streakUtils';
 import { useAuth } from '@/lib/AuthContext';
 
 import DifficultySheet from '@/components/DifficultySheet';
@@ -54,7 +54,8 @@ export default function Home() {
 
   const lastActive = user?.last_active_date;
   const streakAlive = isStreakAlive(lastActive);
-  const completedToday = hasCompletedTodaysSprint(lastActive);
+  // Completion is ONLY based on whether a Session exists for today
+  const completedToday = sessions.some(s => s.date === getTodayDate());
   const { allowed: drillAllowed, remaining, isPremium } = getDrillAccess(sessions, user);
 
   if (loading) {
@@ -132,10 +133,10 @@ export default function Home() {
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground">
-              {completedToday ? 'Drill Complete!' : 'Your drill is waiting for you'}
+              {completedToday ? 'Drill Complete ⚡' : 'Your daily drill is waiting'}
             </p>
             <p className="text-xs text-muted-foreground">
-              {completedToday ? 'You\'ve trained today. Keep the streak alive.' : 'Start now to keep your streak alive.'}
+              {completedToday ? 'You\'ve locked in today\'s training.' : 'Keep your streak alive by completing it now'}
             </p>
           </div>
         </div>
