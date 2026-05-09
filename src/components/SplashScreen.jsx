@@ -34,7 +34,7 @@ export default function SplashScreen({ onDone }) {
             src="https://media.base44.com/images/public/69fcb12caee6ab9a4c226c8f/aa9e7382c_Untitleddesign1.png"
             alt="QuantDrill"
             width={160}
-            style={{ height: 'auto', display: 'block' }}
+            style={{ height: 'auto', display: 'block', backgroundColor: 'transparent' }}
             draggable={false}
           />
         </motion.div>

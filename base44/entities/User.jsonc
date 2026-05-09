@@ -36,6 +36,16 @@
       "type": "string",
       "format": "date",
       "description": "Date when the subscription expires"
+    },
+    "reminder_time": {
+      "type": "string",
+      "description": "Daily reminder time in HH:MM format (24-hour)",
+      "pattern": "^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
+    },
+    "reminder_enabled": {
+      "type": "boolean",
+      "description": "Whether daily reminders are enabled",
+      "default": true
     }
   },
   "required": [

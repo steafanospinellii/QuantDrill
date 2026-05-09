@@ -8,9 +8,21 @@ const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 function multiplication(difficulty) {
   let a, b;
-  if (difficulty === 'easy') { a = rand(6, 15); b = rand(6, 15); }
-  else if (difficulty === 'medium') { a = rand(15, 35); b = rand(12, 25); }
-  else { a = rand(25, 99); b = rand(11, 19); }
+  if (difficulty === 'easy') { 
+    // Round numbers, single operation
+    a = pick([4, 5, 6, 8, 10, 12, 15]);
+    b = pick([5, 6, 8, 10, 15, 20, 25]);
+  }
+  else if (difficulty === 'medium') { 
+    // Less clean, more thinking
+    a = rand(14, 38);
+    b = rand(11, 24);
+  }
+  else { 
+    // Ugly numbers, multi-digit
+    a = rand(43, 87);
+    b = rand(13, 28);
+  }
   return {
     type: 'mental_math',
     subtype: 'multiplication',
@@ -22,9 +34,21 @@ function multiplication(difficulty) {
 
 function division(difficulty) {
   let b, result;
-  if (difficulty === 'easy') { b = pick([2, 4, 5, 8, 10]); result = rand(10, 60); }
-  else if (difficulty === 'medium') { b = pick([6, 7, 8, 9, 11]); result = rand(12, 90); }
-  else { b = pick([7, 8, 9, 11, 13]); result = rand(20, 130); }
+  if (difficulty === 'easy') { 
+    // Round numbers, fast calculation
+    b = pick([2, 4, 5, 8, 10]);
+    result = rand(6, 50);
+  }
+  else if (difficulty === 'medium') { 
+    // Less clean divisors
+    b = pick([6, 7, 9, 11, 12, 13]);
+    result = rand(11, 80);
+  }
+  else { 
+    // Ugly, requires concentration
+    b = pick([7, 8, 9, 11, 13, 14, 17]);
+    result = rand(18, 140);
+  }
   const a = b * result;
   return {
     type: 'mental_math',
@@ -54,9 +78,9 @@ function approximation(difficulty) {
 
 function percentageChange(difficulty) {
   const configs = {
-    easy:   { base: [100, 200, 400, 500],        pct: [10, 20, 25, 50] },
-    medium: { base: [120, 250, 360, 480, 840],   pct: [15, 30, 40, 60, 75] },
-    hard:   { base: [137, 284, 612, 875, 948],   pct: [12, 17, 33, 62, 87] },
+    easy:   { base: [100, 200, 400, 500], pct: [10, 20, 25, 50] },
+    medium: { base: [145, 280, 375, 520, 890], pct: [12, 18, 35, 65] },
+    hard:   { base: [237, 463, 718, 945, 1280], pct: [7, 17, 33, 58, 81] },
   };
   const cfg = configs[difficulty];
   const base = pick(cfg.base);
@@ -82,8 +106,8 @@ function percentageChange(difficulty) {
 function percentageOfTotal(difficulty) {
   const configs = {
     easy:   { total: [100, 200, 500], pct: [10, 20, 25, 50] },
-    medium: { total: [240, 360, 480, 750], pct: [15, 30, 35, 60] },
-    hard:   { total: [320, 560, 840, 1200], pct: [12, 17, 37, 62] },
+    medium: { total: [280, 425, 610, 870], pct: [12, 28, 38, 55] },
+    hard:   { total: [375, 640, 920, 1350], pct: [13, 19, 41, 67] },
   };
   const cfg = configs[difficulty];
   const total = pick(cfg.total);
@@ -108,11 +132,11 @@ function percentageOfTotal(difficulty) {
 function cagrIntuition(difficulty) {
   const configs = {
     easy:   { years: [1, 2], rate: [10, 20, 25, 50] },
-    medium: { years: [2, 3], rate: [15, 20, 25, 30] },
-    hard:   { years: [2, 3, 4], rate: [12, 18, 22, 30] },
+    medium: { years: [2, 3], rate: [8, 15, 28, 35] },
+    hard:   { years: [3, 4, 5], rate: [7, 14, 24, 31] },
   };
   const cfg = configs[difficulty];
-  const base = pick([100, 200, 400, 500, 800, 1000]);
+  const base = pick(difficulty === 'easy' ? [100, 200, 400, 500, 800, 1000] : difficulty === 'medium' ? [120, 280, 450, 720] : [185, 320, 580, 950]);
   const rate = pick(cfg.rate);
   const years = pick(cfg.years);
   let result = base;
@@ -154,8 +178,8 @@ function percentOfPercent(difficulty) {
 // ─── BUSINESS MATH ────────────────────────────────────────────────────────────
 
 function profitMargin(difficulty) {
-  const revenue = pick(difficulty === 'easy' ? [100, 200, 500] : difficulty === 'medium' ? [120, 240, 480, 800] : [135, 275, 625, 960]);
-  const margin_pct = pick(difficulty === 'easy' ? [10, 20, 25, 50] : difficulty === 'medium' ? [15, 22, 35, 40] : [12, 18, 27, 43]);
+  const revenue = pick(difficulty === 'easy' ? [100, 200, 500] : difficulty === 'medium' ? [165, 340, 620, 945] : [280, 475, 750, 1250]);
+  const margin_pct = pick(difficulty === 'easy' ? [10, 20, 25, 50] : difficulty === 'medium' ? [11, 23, 37, 48] : [14, 19, 31, 44]);
   const profit = Math.round(revenue * margin_pct / 100);
   const prompts = [
     `Revenue = $${revenue}M, EBITDA margin = ${margin_pct}%. EBITDA? ($M)`,
@@ -172,11 +196,12 @@ function profitMargin(difficulty) {
 }
 
 function breakevenUnits(difficulty) {
-  const fixedCosts = pick(difficulty === 'easy' ? [10000, 20000, 50000] : difficulty === 'medium' ? [12000, 36000, 60000] : [15000, 45000, 75000]);
-  const price = pick(difficulty === 'easy' ? [20, 25, 50] : difficulty === 'medium' ? [15, 30, 40] : [12, 18, 24, 35]);
-  const cogs = Math.round(price * pick(difficulty === 'easy' ? [0.4, 0.5] : [0.3, 0.4, 0.6]));
+  const fixedCosts = pick(difficulty === 'easy' ? [10000, 20000, 50000] : difficulty === 'medium' ? [18000, 47000, 89000] : [32000, 68000, 125000]);
+  const price = pick(difficulty === 'easy' ? [20, 25, 50] : difficulty === 'medium' ? [12, 28, 45] : [15, 24, 38, 52]);
+  const cogsRatio = difficulty === 'easy' ? pick([0.4, 0.5]) : difficulty === 'medium' ? pick([0.38, 0.52, 0.65]) : pick([0.35, 0.58, 0.68]);
+  const cogs = Math.round(price * cogsRatio);
   const contribution = price - cogs;
-  if (contribution <= 0) return breakevenUnits(difficulty); // retry
+  if (contribution <= 0) return breakevenUnits(difficulty);
   const units = Math.round(fixedCosts / contribution);
   return {
     type: 'business_math',
@@ -301,11 +326,11 @@ function gmatWordProblem(difficulty) {
     () => { const spd = pick([40,50,60]); const t = pick([2,3,4]); return { prompt: `Train travels at ${spd}mph for ${t} hours. Distance? (miles)`, answer: spd*t }; },
     () => { const r = rand(5,15); const p = rand(2,8)*1000; return { prompt: `Simple interest: $${p} at ${r}% for 1 year. Interest earned?`, answer: Math.round(p * r / 100) }; },
   ] : difficulty === 'medium' ? [
-    () => { const r1 = pick([40,50,60]); const r2 = pick([80,90,100]); const t = pick([2,3]); return { prompt: `Two trains leave at same time, speeds ${r1} and ${r2}mph. Gap after ${t} hrs? (miles)`, answer: (r2-r1)*t }; },
-    () => { const w = rand(4,10); const d = rand(6,15); return { prompt: `${w} workers complete a job in ${d} days. How many days for 1 worker?`, answer: w*d }; },
+    () => { const r1 = pick([35,48,62]); const r2 = pick([78,85,105]); const t = pick([2,3,4]); return { prompt: `Two trains leave at same time, speeds ${r1}mph and ${r2}mph. Gap after ${t} hrs? (miles)`, answer: (r2-r1)*t }; },
+    () => { const w = rand(6,12); const d = rand(8,18); return { prompt: `${w} workers complete a job in ${d} days. How many days for 3 workers?`, answer: Math.round(w*d/3) }; },
   ] : [
-    () => { const p = rand(2,8)*1000; const r = rand(8,20); const t = rand(2,4); return { prompt: `Compound interest: $${p} at ${r}% annual for ${t} yrs (simple approx). Total value? (round)`, answer: Math.round(p * Math.pow(1 + r/100, t)) }; },
-    () => { const a = rand(3,8); const b = rand(3,8); if (a===b) return gmatWordProblem(difficulty); const lcmAB = lcm(a,b); return { prompt: `Pipe A fills tank in ${a}h, Pipe B in ${b}h. Together, hours to fill? (round to 1 decimal)`, answer: Math.round((a*b/(a+b))*10)/10 }; },
+    () => { const p = rand(3,9)*1500; const r = rand(9,22); const t = rand(3,5); return { prompt: `Compound interest: $${p.toLocaleString()} at ${r}% annual for ${t} yrs. Total value? (round to nearest K)`, answer: Math.round(p * Math.pow(1 + r/100, t) / 1000) }; },
+    () => { const a = rand(4,9); const b = rand(4,9); if (a===b) return gmatWordProblem(difficulty); return { prompt: `Pipe A fills tank in ${a}h, Pipe B empties in ${b}h. If both open, net hours to fill? (round to 1 decimal)`, answer: Math.round((a*b/(a-b))*10)/10 }; },
   ];
   const s = pick(scenarios)();
   return { type: 'gmat_quant', subtype: 'word_problem', prompt: s.prompt, correct_answer: s.answer, difficulty };

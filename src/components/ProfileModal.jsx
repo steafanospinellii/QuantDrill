@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronRight, LogOut, Trash2, AlertTriangle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { queryClientInstance } from '@/lib/query-client';
+import CancellationRetentionFlow from './CancellationRetentionFlow';
+import ReminderSettings from './ReminderSettings';
 
 function clearUserCache() {
   queryClientInstance.clear();
@@ -22,6 +24,23 @@ function formatDate(date) {
 export default function ProfileModal({ open, onClose, user, isPremium }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showCancellation, setShowCancellation] = useState(false);
+  const [showReminders, setShowReminders] = useState(false);
+  const [badgesCount, setBadgesCount] = useState(0);
+
+  useEffect(() => {
+    if (showReminders || showCancellation) return;
+    async function loadBadges() {
+      try {
+        const sessions = await base44.entities.Session.filter({ created_by: user?.email }, '-created_date', 1000);
+        const uniqueDifficulties = new Set(sessions.map(s => s.difficulty));
+        const uniqueCategories = new Set(sessions.map(s => s.category));
+        let count = uniqueDifficulties.size + uniqueCategories.size;
+        setBadgesCount(count);
+      } catch (e) {}
+    }
+    loadBadges();
+  }, [open, user, showReminders, showCancellation]);
 
   const handleLogout = () => {
     clearUserCache();
@@ -118,6 +137,7 @@ export default function ProfileModal({ open, onClose, user, isPremium }) {
 
                     {isPremium && (
                       <button
+                        onClick={() => setShowCancellation(true)}
                         className="w-full flex items-center gap-3 px-4 py-4 bg-surface-2 border border-border rounded-2xl text-left no-select hover:border-primary/50 transition-colors"
                       >
                         <div className="w-9 h-9 rounded-xl bg-surface-3 flex items-center justify-center">
@@ -130,6 +150,21 @@ export default function ProfileModal({ open, onClose, user, isPremium }) {
                         <ChevronRight size={16} className="text-muted-foreground" />
                       </button>
                     )}
+
+                    {/* Reminders */}
+                    <button
+                      onClick={() => setShowReminders(true)}
+                      className="w-full flex items-center gap-3 px-4 py-4 bg-surface-2 border border-border rounded-2xl text-left no-select hover:border-primary/50 transition-colors"
+                    >
+                      <div className="w-9 h-9 rounded-xl bg-surface-3 flex items-center justify-center">
+                        <span className="text-lg">🔔</span>
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-sm font-semibold text-foreground">Daily Reminder</span>
+                        <p className="text-xs text-muted-foreground">Never miss a drill</p>
+                      </div>
+                      <ChevronRight size={16} className="text-muted-foreground" />
+                    </button>
 
                     {/* Logout */}
                     <button
@@ -187,6 +222,38 @@ export default function ProfileModal({ open, onClose, user, isPremium }) {
               )}
             </div>
           </motion.div>
+
+          {/* Reminder Settings Modal */}
+          {showReminders && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="fixed inset-0 flex items-center justify-center z-[10000]"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) setShowReminders(false);
+              }}
+            >
+              <div className="w-full max-w-[480px] mx-5 bg-surface-1 border border-border rounded-3xl p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-grotesk font-bold text-foreground">Daily Reminder Settings</h2>
+                  <button onClick={() => setShowReminders(false)} className="w-8 h-8 bg-surface-2 rounded-xl flex items-center justify-center no-select">
+                    <X size={16} className="text-muted-foreground" />
+                  </button>
+                </div>
+                <ReminderSettings />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Cancellation Retention Flow */}
+          <CancellationRetentionFlow
+            open={showCancellation}
+            onClose={() => setShowCancellation(false)}
+            user={user}
+            streakCount={user?.streak_count || 0}
+            badgesCount={badgesCount}
+          />
         </div>
       )}
     </AnimatePresence>
