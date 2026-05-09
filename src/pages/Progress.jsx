@@ -9,6 +9,8 @@ import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import PullToRefreshIndicator from '@/components/PullToRefreshIndicator';
 import { CATEGORY_LABELS } from '@/lib/badges';
 import { useNavigate } from 'react-router-dom';
+import TrainingCalendar from '@/components/progress/TrainingCalendar';
+import PremiumInsights from '@/components/progress/PremiumInsights';
 
 const CATEGORIES = ['mental_math', 'percentages_growth', 'business_math', 'market_sizing', 'gmat_quant'];
 
@@ -302,6 +304,12 @@ export default function Progress() {
           )}
         </div>
         </motion.div>
+
+      {/* Training Calendar */}
+      <TrainingCalendar sessions={sessions} />
+
+      {/* Premium Insights */}
+      <PremiumInsights sessions={sessions} isPremium={isPremium} user={user} />
     </div>
   );
 }
