@@ -119,6 +119,14 @@ export default function Layout() {
             </div>
           </nav>
         )}
+
+        {/* ── Desktop cookie preferences link ── */}
+        <button
+          onClick={() => window.openCookiePreferences?.()}
+          className="hidden lg:block fixed bottom-6 left-6 text-xs text-muted-foreground hover:text-foreground transition-colors no-select"
+        >
+          Cookie Preferences
+        </button>
       </div>
     </div>
   );

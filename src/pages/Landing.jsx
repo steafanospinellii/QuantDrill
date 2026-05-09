@@ -248,9 +248,16 @@ export default function Landing() {
 
         {/* ── Footer ── */}
         <footer className="px-6 py-6 border-t border-white/10 flex items-center justify-center gap-6 text-xs">
-        <a href="/privacy" className="text-white/50 hover:text-white transition-colors">Privacy Policy</a>
-        <span className="w-1 h-1 rounded-full bg-white/20" />
-        <a href="/terms" className="text-white/50 hover:text-white transition-colors">Terms of Service</a>
+          <a href="/privacy" className="text-white/50 hover:text-white transition-colors">Privacy Policy</a>
+          <span className="w-1 h-1 rounded-full bg-white/20" />
+          <a href="/terms" className="text-white/50 hover:text-white transition-colors">Terms of Service</a>
+          <span className="w-1 h-1 rounded-full bg-white/20" />
+          <button
+            onClick={() => window.openCookiePreferences?.()}
+            className="text-white/50 hover:text-white transition-colors no-select"
+          >
+            Cookie Preferences
+          </button>
         </footer>
         </div>
         );
