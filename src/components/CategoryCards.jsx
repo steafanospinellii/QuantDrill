@@ -59,6 +59,7 @@ export default function CategoryCards({ difficulty, isPremium, onNeedsAuth }) {
         open={!!sheetCategory}
         value={difficulty}
         category={sheetCategory}
+        isPremium={isPremium}
         onClose={() => setSheetCategory(null)}
         onNeedsAuth={onNeedsAuth ? (settings) => {
           setSheetCategory(null);
