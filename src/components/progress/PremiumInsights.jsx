@@ -81,7 +81,7 @@ export default function PremiumInsights({ sessions, isPremium, user }) {
       </div>
 
       {/* Blurred container */}
-      <div className={`relative transition-all duration-300 ${blurClass}`}>
+      <div className={`relative transition-all duration-300 ${isPremium ? '' : 'blur-xl brightness-50'}`}>
         <div className="space-y-3">
           {/* Card 1: Elite Gap Tracker */}
           <motion.div
@@ -222,16 +222,28 @@ export default function PremiumInsights({ sessions, isPremium, user }) {
         </div>
       </div>
 
-      {/* Unlock CTA for free users */}
+      {/* Gradient fade overlay for free users */}
       {showLock && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-2xl pointer-events-none">
-          <button
-            onClick={() => navigate('/paywall')}
-            className="px-6 py-3 bg-primary text-primary-foreground text-xs font-bold rounded-xl pointer-events-auto no-select active:scale-95 transition-transform"
-          >
-            Unlock Premium Insights →
-          </button>
-        </div>
+        <>
+          {/* Gradient mask overlay */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'linear-gradient(to bottom, transparent 0%, hsl(220 20% 6%) 100%)',
+              maskImage: 'linear-gradient(to bottom, transparent 0%, black 50%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 50%)',
+            }}
+          />
+          {/* Unlock CTA button */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <button
+              onClick={() => navigate('/paywall')}
+              className="px-6 py-3 bg-primary text-primary-foreground text-xs font-bold rounded-xl pointer-events-auto no-select active:scale-95 transition-transform relative z-10"
+            >
+              Unlock Premium Insights →
+            </button>
+          </div>
+        </>
       )}
     </motion.div>
   );

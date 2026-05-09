@@ -117,8 +117,9 @@ export default function Progress() {
         <p className="text-sm text-muted-foreground mb-6">Your quantitative performance over time</p>
       </motion.div>
 
+      <div className="flex flex-col gap-8">
       {/* Summary cards */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <MiniStat icon={<Flame size={16} className="text-neon-orange" />} label="Streak" value={`${user?.streak_count || 0}d`} />
         <MiniStat icon={<Target size={16} className="text-neon-purple" />} label="Avg Score" value={avgScore || '—'} sub="last 7 sessions" />
         <MiniStat icon={<Zap size={16} className="text-neon-cyan" />} label="This Week" value={`${completedDays}/7`} sub="days trained" />
@@ -127,7 +128,7 @@ export default function Progress() {
 
       {/* Strongest / Weakest */}
       {(strongest || weakest) && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="grid grid-cols-2 gap-3 mb-6">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="grid grid-cols-2 gap-3">
           {strongest && (
             <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-3">
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Strongest</p>
@@ -146,7 +147,7 @@ export default function Progress() {
       )}
 
       {/* Score chart */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-surface-1 border border-border rounded-3xl p-5 mb-5">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-surface-1 border border-border rounded-3xl p-5">
         <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-5">Best Score — Last 7 Days</p>
         <ResponsiveContainer width="100%" height={150}>
           <BarChart data={last7} barSize={24}>
@@ -163,7 +164,7 @@ export default function Progress() {
 
       {/* Category breakdown */}
       {catStats.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }} className="mb-6">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}>
           <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-3">By Category</p>
           <div className="space-y-2.5">
             {catStats.map(({ cat, count, avgAcc, avgSpeed, best, improvement }) => (
@@ -203,7 +204,7 @@ export default function Progress() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
           <button
             onClick={() => navigate('/paywall')}
-            className="w-full bg-surface-2 border border-primary/20 rounded-2xl px-4 py-4 flex items-center justify-between mb-6 no-select"
+            className="w-full bg-surface-2 border border-primary/20 rounded-2xl px-4 py-4 flex items-center justify-between no-select"
           >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -225,7 +226,7 @@ export default function Progress() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.38 }}
-        className={`bg-surface-1 border border-border rounded-3xl p-5 mb-6 scroll-mt-20 transition-all duration-500 ${
+        className={`bg-surface-1 border border-border rounded-3xl p-5 scroll-mt-20 transition-all duration-500 ${
           highlightedId === 'accuracy'
             ? 'border-l-4 border-l-primary bg-primary/[0.084]'
             : ''
@@ -255,7 +256,7 @@ export default function Progress() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.41 }}
-        className={`bg-surface-1 border border-border rounded-3xl p-5 mb-6 scroll-mt-20 transition-all duration-500 ${
+        className={`bg-surface-1 border border-border rounded-3xl p-5 scroll-mt-20 transition-all duration-500 ${
           highlightedId === 'speed'
             ? 'border-l-4 border-l-primary bg-primary/[0.084]'
             : ''
@@ -310,6 +311,7 @@ export default function Progress() {
 
       {/* Premium Insights */}
       <PremiumInsights sessions={sessions} isPremium={isPremium} user={user} />
+      </div>
     </div>
   );
 }
