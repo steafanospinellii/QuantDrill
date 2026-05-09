@@ -26,7 +26,7 @@ const CATEGORIES = [
 
 export default function CookieBanner() {
   const [showBanner, setShowBanner] = useState(false);
-  const [showManageModal, setShowManageModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [preferences, setPreferences] = useState({
     essential: true,
     analytics: false,
@@ -37,52 +37,54 @@ export default function CookieBanner() {
   useEffect(() => {
     const existing = getConsentState();
     if (existing) {
-      // User has already given consent, apply it immediately
+      // User already gave consent
       setPreferences(existing);
       setShowBanner(false);
+      setShowModal(false);
     } else {
       // No consent yet, show banner
       setShowBanner(true);
+      setShowModal(false);
     }
+  }, []);
+
+  // Expose function to open preferences from anywhere
+  useEffect(() => {
+    window.openCookiePreferences = () => {
+      setShowModal(true);
+    };
   }, []);
 
   const handleRejectAll = () => {
     rejectAll();
     setShowBanner(false);
-    setShowManageModal(false);
+    setShowModal(false);
   };
 
   const handleAcceptAll = () => {
     acceptAll();
     setShowBanner(false);
-    setShowManageModal(false);
+    setShowModal(false);
   };
 
   const handleSavePreferences = () => {
     saveConsentState(preferences);
     setShowBanner(false);
-    setShowManageModal(false);
+    setShowModal(false);
   };
 
   const handleToggle = (key) => {
-    if (key === 'essential') return; // Don't allow disabling essential
+    if (key === 'essential') return; // Essential is locked
     setPreferences(prev => ({
       ...prev,
       [key]: !prev[key],
     }));
   };
 
-  // Expose function to open preferences from elsewhere
-  useEffect(() => {
-    window.openCookiePreferences = () => {
-      setShowManageModal(true);
-    };
-  }, []);
-
   return (
     <AnimatePresence mode="wait">
-      {/* Main Banner */}
-      {showBanner && !showManageModal && (
+      {/* Main Banner — shows first for new users */}
+      {showBanner && !showModal && (
         <motion.div
           key="banner"
           initial={{ opacity: 0, y: 20 }}
@@ -93,57 +95,55 @@ export default function CookieBanner() {
           style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom, 20px))' }}
         >
           <div className="max-w-2xl mx-auto bg-surface-1 border border-border rounded-2xl p-6 shadow-2xl">
-            <div className="flex items-start gap-6">
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-grotesk font-bold text-foreground mb-2">We use cookies</h3>
-                <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-                  We use cookies to ensure the app works correctly and, with your consent, to analyze usage and improve your experience.
-                </p>
+            <div className="flex-1">
+              <h3 className="text-lg font-grotesk font-bold text-foreground mb-2">We use cookies</h3>
+              <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+                We use cookies to ensure the app works correctly and, with your consent, to analyze usage and improve your experience.
+              </p>
 
-                {/* Buttons */}
-                <div className="flex flex-col sm:flex-row gap-3 mb-4">
-                  <button
-                    onClick={handleRejectAll}
-                    className="px-4 py-2.5 bg-surface-2 border border-border text-foreground text-sm font-semibold rounded-lg no-select hover:border-primary/50 transition-colors active:scale-95"
-                  >
-                    Reject All
-                  </button>
-                  <button
-                    onClick={() => setShowManageModal(true)}
-                    className="px-4 py-2.5 bg-surface-2 border border-border text-foreground text-sm font-semibold rounded-lg no-select hover:border-primary/50 transition-colors active:scale-95"
-                  >
-                    Manage Preferences
-                  </button>
-                  <button
-                    onClick={handleAcceptAll}
-                    className="px-4 py-2.5 bg-primary text-primary-foreground text-sm font-semibold rounded-lg no-select active:scale-95 transition-transform"
-                  >
-                    Accept All
-                  </button>
-                </div>
-
-                {/* Privacy link */}
-                <a
-                  href="/privacy"
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              {/* Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                <button
+                  onClick={handleRejectAll}
+                  className="px-4 py-2.5 bg-surface-2 border border-border text-foreground text-sm font-semibold rounded-lg no-select hover:border-primary/50 transition-colors active:scale-95"
                 >
-                  Read our Privacy Policy
-                </a>
+                  Reject All
+                </button>
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="px-4 py-2.5 bg-surface-2 border border-border text-foreground text-sm font-semibold rounded-lg no-select hover:border-primary/50 transition-colors active:scale-95"
+                >
+                  Manage Preferences
+                </button>
+                <button
+                  onClick={handleAcceptAll}
+                  className="px-4 py-2.5 bg-primary text-primary-foreground text-sm font-semibold rounded-lg no-select active:scale-95 transition-transform"
+                >
+                  Accept All
+                </button>
               </div>
+
+              {/* Privacy link */}
+              <a
+                href="/privacy"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Read our Privacy Policy
+              </a>
             </div>
           </div>
         </motion.div>
       )}
 
       {/* Manage Preferences Modal */}
-      {showManageModal && (
+      {showModal && (
         <>
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowManageModal(false)}
+            onClick={() => setShowModal(false)}
             className="fixed inset-0 bg-black/60 z-50"
           />
           <motion.div
@@ -152,14 +152,14 @@ export default function CookieBanner() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-            className="fixed inset-x-5 top-1/2 -translate-y-1/2 z-50 mx-auto max-w-md max-h-[90vh] overflow-y-auto"
+            className="fixed inset-x-5 top-1/2 -translate-y-1/2 z-50 mx-auto max-w-md"
           >
-            <div className="bg-surface-1 border border-border rounded-2xl p-6">
+            <div className="bg-surface-1 border border-border rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-grotesk font-bold text-foreground">Cookie Preferences</h2>
                 <button
-                  onClick={() => setShowManageModal(false)}
+                  onClick={() => setShowModal(false)}
                   className="w-7 h-7 bg-surface-2 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground no-select transition-colors"
                 >
                   <X size={16} />
@@ -167,13 +167,13 @@ export default function CookieBanner() {
               </div>
 
               {/* Categories */}
-              <div className="space-y-4 mb-6">
+              <div className="space-y-4 mb-8">
                 {CATEGORIES.map(category => (
                   <div
                     key={category.key}
                     className="bg-surface-2 border border-border rounded-xl p-4 flex items-start justify-between gap-4"
                   >
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1">
                       <p className="text-sm font-semibold text-foreground mb-1">{category.label}</p>
                       <p className="text-xs text-muted-foreground leading-relaxed">{category.description}</p>
                     </div>
