@@ -756,17 +756,7 @@ export const BADGES_PART_3 = [
     border: 'border-orange-500/30',
     check: ({ streak }) => streak >= 4,
   },
-  {
-    id: 'fun_first_hundred',
-    label: 'Century Club',
-    description: 'Score 100+ in a single session',
-    category: 'fun',
-    emoji: '💯',
-    color: 'text-yellow-400',
-    bg: 'bg-yellow-500/10',
-    border: 'border-yellow-500/30',
-    check: ({ maxScore }) => maxScore >= 100,
-  },
+
   {
     id: 'fun_recovery_expert',
     label: 'Recovery Expert',
