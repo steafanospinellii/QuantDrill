@@ -21,6 +21,7 @@ import Paywall from '@/pages/Paywall';
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated } = useAuth();
   const location = useLocation();
+  const [splashDone, setSplashDone] = useState(false);
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -34,9 +35,8 @@ const AuthenticatedApp = () => {
     return <UserNotRegisteredError />;
   }
 
-  // auth_required just means the user is not logged in — still render routes
-  // so unauthenticated users see the landing page at /
-  if (authError?.type === 'auth_required') {
+  // Unauthenticated → go straight to Landing, no splash
+  if (authError?.type === 'auth_required' || !isAuthenticated) {
     return (
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
@@ -47,10 +47,15 @@ const AuthenticatedApp = () => {
     );
   }
 
+  // Authenticated → show splash first, then app
+  if (!splashDone) {
+    return <SplashScreen onDone={() => setSplashDone(true)} />;
+  }
+
   return (
     <AnimatePresence mode="wait" initial={false}>
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <Landing />} />
+        <Route path="/" element={<Navigate to="/home" replace />} />
         <Route element={<Layout />}>
           <Route path="/home" element={<Home />} />
           <Route path="/progress" element={<Progress />} />
@@ -66,17 +71,12 @@ const AuthenticatedApp = () => {
 };
 
 function App() {
-  const [splashDone, setSplashDone] = useState(false);
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <SplashScreen onDone={() => setSplashDone(true)} />
-        {splashDone && (
-          <Router>
-            <AuthenticatedApp />
-          </Router>
-        )}
+        <Router>
+          <AuthenticatedApp />
+        </Router>
         <Toaster />
       </QueryClientProvider>
     </AuthProvider>
