@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Flame, TrendingUp, Zap, Target, Clock, Lock } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { format, subDays } from 'date-fns';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import PullToRefreshIndicator from '@/components/PullToRefreshIndicator';
@@ -16,9 +16,8 @@ export default function Progress() {
   const [sessions, setSessions] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [scrolled, setScrolled] = useState(false);
   const [highlightedId, setHighlightedId] = useState(null);
 
   const load = useCallback(async () => {
@@ -36,21 +35,23 @@ export default function Progress() {
   useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
-    if (!scrolled && location.hash) {
+    const sectionParam = searchParams.get('section');
+    if (sectionParam) {
+      // Wait for scroll to complete, then highlight
       setTimeout(() => {
-        const elementId = location.hash.replace('#', '');
-        const element = document.getElementById(elementId);
+        const element = document.getElementById(sectionParam);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth' });
-          setHighlightedId(elementId);
-          // Clear highlight after 1.5 seconds
-          const timer = setTimeout(() => setHighlightedId(null), 1500);
-          setScrolled(true);
-          return () => clearTimeout(timer);
+          // Delay highlight until after scroll completes
+          setTimeout(() => {
+            setHighlightedId(sectionParam);
+            // Clear highlight after 2 seconds
+            setTimeout(() => setHighlightedId(null), 2000);
+          }, 300);
         }
-      }, 100);
+      }, 0);
     }
-  }, [location.hash, scrolled]);
+  }, [searchParams]);
 
   const { containerRef, pullDistance, isRefreshing, handlers } = usePullToRefresh(load);
 
@@ -222,10 +223,10 @@ export default function Progress() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.38 }}
-        className={`rounded-3xl p-5 mb-6 scroll-mt-20 ${
+        className={`bg-surface-1 border border-border rounded-3xl p-5 mb-6 scroll-mt-20 transition-all duration-500 ${
           highlightedId === 'accuracy'
-            ? 'bg-surface-1 border-2 border-primary animate-pulse'
-            : 'bg-surface-1 border border-border'
+            ? 'border-l-4 border-l-primary bg-primary/[0.084]'
+            : ''
         }`}
       >
         <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-4">Accuracy — 5-Session Moving Average</p>
@@ -252,10 +253,10 @@ export default function Progress() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.41 }}
-        className={`rounded-3xl p-5 mb-6 scroll-mt-20 ${
+        className={`bg-surface-1 border border-border rounded-3xl p-5 mb-6 scroll-mt-20 transition-all duration-500 ${
           highlightedId === 'speed'
-            ? 'bg-surface-1 border-2 border-primary animate-pulse'
-            : 'bg-surface-1 border border-border'
+            ? 'border-l-4 border-l-primary bg-primary/[0.084]'
+            : ''
         }`}
       >
         <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-4">Response Time — 5-Session Moving Average (seconds)</p>
@@ -284,9 +285,9 @@ export default function Progress() {
         transition={{ delay: 0.44 }}
         className="scroll-mt-20"
       >
-        <div className={`${
+        <div className={`bg-surface-1 border border-border rounded-3xl p-5 transition-all duration-500 ${
           highlightedId === 'sessions'
-            ? 'bg-surface-1 border-2 border-primary rounded-3xl p-5 animate-pulse'
+            ? 'border-l-4 border-l-primary bg-primary/[0.084]'
             : ''
         }`}>
           <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-3">All Sessions</p>

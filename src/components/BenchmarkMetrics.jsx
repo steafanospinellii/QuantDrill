@@ -111,7 +111,7 @@ export default function BenchmarkMetrics({ sessions }) {
         ringColor={accuracyColor}
         delay={0.05}
         noData={!hasData}
-        onClick={() => navigate('/progress#accuracy')}
+        onClick={() => navigate('/progress?section=accuracy')}
       />
       <MetricCard
         label="Speed Rank"
@@ -121,7 +121,7 @@ export default function BenchmarkMetrics({ sessions }) {
         ringColor="hsl(262 83% 68%)"
         delay={0.1}
         noData={!hasData}
-        onClick={() => navigate('/progress#speed')}
+        onClick={() => navigate('/progress?section=speed')}
       />
       <MetricCard
         label="Volume"
@@ -131,7 +131,7 @@ export default function BenchmarkMetrics({ sessions }) {
         ringColor="hsl(28 100% 58%)"
         delay={0.15}
         noData={totalSessions === 0}
-        onClick={() => navigate('/progress#sessions')}
+        onClick={() => navigate('/progress?section=sessions')}
       />
     </div>
   );
