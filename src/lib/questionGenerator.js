@@ -225,51 +225,6 @@ function contributionMargin(difficulty) {
 
 // ─── MARKET SIZING ────────────────────────────────────────────────────────────
 
-function marketSizing(difficulty) {
-  const scenarios = [
-    {
-      prompt: 'US has 330M people. ~25% are working professionals. If 10% use productivity software at $20/mo, annual market? ($B, round)',
-      answer: Math.round(330 * 0.25 * 0.1 * 20 * 12 / 1000),
-    },
-    {
-      prompt: 'City of 2M people. 30% commute daily by rideshare (~$12/trip). Annual rideshare market? ($B, round)',
-      answer: Math.round(2000000 * 0.3 * 12 * 250 / 1e9),
-    },
-    {
-      prompt: 'Office: 800 employees, each orders lunch 3×/week at $12. Annual lunch spend? ($K)',
-      answer: Math.round(800 * 3 * 12 * 50 / 1000),
-    },
-    {
-      prompt: 'Country has 50M households. 40% subscribe to streaming at $15/mo. Annual market? ($B, round)',
-      answer: Math.round(50e6 * 0.4 * 15 * 12 / 1e9),
-    },
-    {
-      prompt: '10M SMBs in the US. 15% use accounting software at $50/mo. Annual market? ($B, round)',
-      answer: Math.round(10e6 * 0.15 * 50 * 12 / 1e9),
-    },
-    {
-      prompt: 'Airport with 50K daily passengers. 20% buy coffee at $5. Annual coffee revenue? ($M, round)',
-      answer: Math.round(50000 * 0.2 * 5 * 365 / 1e6),
-    },
-    {
-      prompt: 'Hospital sees 400 patients/day. Average stay = 3 days at $1,200/day. Monthly revenue? ($M, round)',
-      answer: Math.round(400 * 3 * 1200 * 30 / 1e6),
-    },
-    {
-      prompt: 'Gym has 2,000 members paying $50/mo. Annual membership revenue? ($K)',
-      answer: Math.round(2000 * 50 * 12 / 1000),
-    },
-  ];
-  return {
-    type: 'market_sizing',
-    prompt: pick(scenarios).prompt,
-    correct_answer: pick(scenarios).answer,
-    difficulty,
-  };
-}
-
-// Note: market_sizing uses fixed scenarios above so answer is always consistent.
-// Re-picking for answer doesn't match — fix by capturing s once:
 function marketSizingFixed(difficulty) {
   const scenarios = [
     { prompt: 'US has 330M people. ~25% are professionals. 10% use software at $20/mo. Annual market? ($B, round)', answer: Math.round(330e6 * 0.25 * 0.1 * 20 * 12 / 1e9) },

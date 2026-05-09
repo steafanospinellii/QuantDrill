@@ -25,7 +25,7 @@ export default function Home() {
       try {
         const u = await base44.auth.me();
         setUser(u);
-        const s = await base44.entities.Session.list('-created_date', 20);
+        const s = await base44.entities.Session.filter({ created_by: u.email }, '-created_date', 20);
         setSessions(s);
       } catch (e) {}
       finally { setLoading(false); }
