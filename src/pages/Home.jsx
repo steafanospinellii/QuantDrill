@@ -4,24 +4,26 @@ import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
 import { Flame, Zap, Settings, ChevronRight } from 'lucide-react';
 import { hasCompletedTodaysSprint, isStreakAlive } from '@/lib/streakUtils';
-import SettingsModal from '@/components/SettingsModal';
+
 import DifficultySheet from '@/components/DifficultySheet';
 import CategoryCards from '@/components/CategoryCards';
 import { getDrillAccess } from '@/lib/freemium';
 import BenchmarkMetrics from '@/components/BenchmarkMetrics';
 import DailyLimitModal from '@/components/DailyLimitModal';
 import LoginScreen from '@/components/LoginScreen';
+import SettingsModal from '@/components/SettingsModal';
 
 export default function Home() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+
   const [diffSheetOpen, setDiffSheetOpen] = useState(false);
   const [limitModalOpen, setLimitModalOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [pendingDrillSettings, setPendingDrillSettings] = useState(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -54,9 +56,9 @@ export default function Home() {
       className="min-h-screen bg-background px-5 lg:px-0 pb-8 flex flex-col gap-6 lg:max-w-3xl lg:mx-auto lg:w-full"
       style={{ paddingTop: 'max(48px, env(safe-area-inset-top, 48px))' }}
     >
-      {/* ── Header ── */}
+      {/* ── Header (mobile only, desktop settings in sidebar) ── */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between lg:hidden">
           <h1 className="text-2xl font-grotesk font-bold text-foreground tracking-tight">
             Quant<span className="text-neon-purple">Drill</span>
           </h1>
@@ -66,6 +68,11 @@ export default function Home() {
           >
             <Settings size={16} className="text-muted-foreground" />
           </button>
+        </div>
+        <div className="hidden lg:block">
+          <h1 className="text-2xl font-grotesk font-bold text-foreground tracking-tight">
+            Quant<span className="text-neon-purple">Drill</span>
+          </h1>
         </div>
       </motion.div>
 

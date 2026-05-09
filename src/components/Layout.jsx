@@ -1,8 +1,12 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Home, BarChart2, Award, Zap } from 'lucide-react';
+import { Home, BarChart2, Award, Zap, Settings, ChevronRight } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
+import { base44 } from '@/api/base44Client';
 import PageTransition from './PageTransition';
+import ProfileModal from './ProfileModal';
+import SettingsModal from './SettingsModal';
+import { getDrillAccess } from '@/lib/freemium';
 
 const navItems = [
   { path: '/home', icon: Home, label: 'Home' },
@@ -14,6 +18,25 @@ export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const isDrill = location.pathname === '/drill';
+
+  const [user, setUser] = useState(null);
+  const [sessions, setSessions] = useState([]);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const u = await base44.auth.me();
+        setUser(u);
+        const s = await base44.entities.Session.filter({ created_by: u.email }, '-created_date', 20);
+        setSessions(s);
+      } catch (e) {}
+    }
+    load();
+  }, []);
+
+  const { isPremium } = getDrillAccess(sessions, user);
 
   const scrollPositions = useRef({});
   const mainRef = useRef(null);
@@ -66,14 +89,31 @@ export default function Layout() {
           })}
         </nav>
 
-        {/* Upgrade CTA at bottom of sidebar (shown via page, but placeholder here) */}
-        <div className="px-3 pb-6 pt-2 border-t border-border">
+        {/* Profile & Settings at bottom */}
+        <div className="px-3 pb-6 pt-2 border-t border-border space-y-2">
+          {/* Profile button */}
           <button
-            onClick={() => navigate('/paywall')}
-            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all no-select"
+            onClick={() => setProfileOpen(true)}
+            className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm hover:bg-white/5 transition-all no-select group"
           >
-            <Zap size={16} className="text-primary" />
-            Upgrade to Pro
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-xs font-bold text-primary-foreground shrink-0">
+              {user?.email?.slice(0, 2).toUpperCase() || '?'}
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-xs font-semibold text-muted-foreground group-hover:text-foreground truncate">
+                {user?.email?.split('@')[0] || 'Profile'}
+              </p>
+            </div>
+            <ChevronRight size={14} className="text-muted-foreground group-hover:text-foreground shrink-0" />
+          </button>
+
+          {/* Settings button */}
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all no-select"
+          >
+            <Settings size={16} />
+            Settings
           </button>
         </div>
       </aside>
@@ -128,6 +168,10 @@ export default function Layout() {
           Cookie Preferences
         </button>
       </div>
+
+      {/* ── Modals ── */}
+      <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} user={user} isPremium={isPremium} />
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }
