@@ -80,17 +80,17 @@ export default function PremiumInsights({ sessions, isPremium, user }) {
         {showLock && <Lock size={12} className="text-muted-foreground" />}
       </div>
 
-      {/* Blurred container */}
-      <div className={`relative transition-all duration-300 ${isPremium ? '' : 'blur-xl brightness-50'}`}>
+      {/* Content container */}
+      <div className="relative">
         <div className="space-y-3">
-          {/* Card 1: Elite Gap Tracker */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.54 }}
-            className="bg-surface-2 border border-border rounded-2xl p-4"
-          >
-            <p className="text-xs font-semibold text-foreground mb-3">Elite Gap Tracker</p>
+           {/* Card 1: Elite Gap Tracker */}
+           <motion.div
+             initial={{ opacity: 0, y: 12 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.54 }}
+             className="bg-surface-1 border border-primary/20 rounded-2xl p-5"
+           >
+             <p className="text-xs font-semibold text-neon-purple mb-4 tracking-widest uppercase">Elite Gap Tracker</p>
             <div className="space-y-2.5">
               {catStats.map(({ cat, avgScore }) => {
                 const elite = ELITE_BENCHMARKS[cat];
@@ -124,9 +124,9 @@ export default function PremiumInsights({ sessions, isPremium, user }) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.56 }}
-            className="bg-surface-2 border border-border rounded-2xl p-4"
+            className="bg-surface-1 border border-primary/20 rounded-2xl p-5"
           >
-            <p className="text-xs font-semibold text-foreground mb-3">Weakness Radar</p>
+            <p className="text-xs font-semibold text-neon-purple mb-4 tracking-widest uppercase">Weakness Radar</p>
             <div className="space-y-2">
               {weakest.map(({ cat, avgScore }) => {
                 let color = 'text-red-400';
@@ -153,9 +153,9 @@ export default function PremiumInsights({ sessions, isPremium, user }) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.58 }}
-            className="bg-surface-2 border border-border rounded-2xl p-4"
+            className="bg-surface-1 border border-primary/20 rounded-2xl p-5"
           >
-            <p className="text-xs font-semibold text-foreground mb-3">Speed Under Pressure</p>
+            <p className="text-xs font-semibold text-neon-cyan mb-4 tracking-widest uppercase">Speed Under Pressure</p>
             <div className="text-center">
               <p className="text-3xl font-grotesk font-black text-neon-cyan">{fastAccuracy}%</p>
               <p className="text-xs text-muted-foreground mt-1">Correct answers under 8 seconds</p>
@@ -170,9 +170,9 @@ export default function PremiumInsights({ sessions, isPremium, user }) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.60 }}
-            className="bg-surface-2 border border-border rounded-2xl p-4"
+            className="bg-surface-1 border border-primary/20 rounded-2xl p-5"
           >
-            <p className="text-xs font-semibold text-foreground mb-3">Consistency Score</p>
+            <p className="text-xs font-semibold text-neon-orange mb-4 tracking-widest uppercase">Consistency Score</p>
             <div className="text-center">
               <p className="text-3xl font-grotesk font-black text-neon-purple">{Math.round(consistency)}</p>
               <p className="text-xs text-muted-foreground mt-1">Stability across sessions</p>
@@ -187,9 +187,9 @@ export default function PremiumInsights({ sessions, isPremium, user }) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.62 }}
-            className="bg-surface-2 border border-border rounded-2xl p-4"
+            className="bg-surface-1 border border-primary/20 rounded-2xl p-5"
           >
-            <p className="text-xs font-semibold text-foreground mb-3">Improvement Momentum</p>
+            <p className="text-xs font-semibold text-neon-purple mb-4 tracking-widest uppercase">Improvement Momentum</p>
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">Score Trend</span>
@@ -220,31 +220,36 @@ export default function PremiumInsights({ sessions, isPremium, user }) {
             </div>
           </motion.div>
         </div>
-      </div>
 
-      {/* Gradient fade overlay for free users */}
-      {showLock && (
-        <>
-          {/* Gradient mask overlay */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: 'linear-gradient(to bottom, transparent 0%, hsl(220 20% 6%) 100%)',
-              maskImage: 'linear-gradient(to bottom, transparent 0%, black 50%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 50%)',
-            }}
-          />
-          {/* Unlock CTA button */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        {/* Gradient blur overlay for free users */}
+        {showLock && (
+          <>
+            {/* Progressive blur mask */}
+            <div
+              className="absolute inset-0 pointer-events-none rounded-2xl"
+              style={{
+                background: 'linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0.8) 80%, rgba(0, 0, 0, 0.95) 100%)',
+              }}
+            />
+            {/* Content blur effect */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                backdropFilter: 'blur(8px)',
+                maskImage: 'linear-gradient(to bottom, transparent 0%, black 50%)',
+                WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 50%)',
+              }}
+            />
+            {/* Unlock CTA button */}
             <button
               onClick={() => navigate('/paywall')}
-              className="px-6 py-3 bg-primary text-primary-foreground text-xs font-bold rounded-xl pointer-events-auto no-select active:scale-95 transition-transform relative z-10"
+              className="absolute bottom-12 left-1/2 -translate-x-1/2 px-6 py-3 bg-primary text-primary-foreground text-xs font-bold rounded-xl pointer-events-auto no-select active:scale-95 transition-transform z-20"
             >
               Unlock Premium Insights →
             </button>
-          </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </motion.div>
   );
 }
