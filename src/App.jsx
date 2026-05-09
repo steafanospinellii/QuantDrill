@@ -7,6 +7,7 @@ import { AnimatePresence } from 'framer-motion';
 import PageTransition from '@/components/PageTransition';
 import PageNotFound from './lib/PageNotFound';
 import SplashScreen from '@/components/SplashScreen';
+import LoginScreen from '@/components/LoginScreen';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Layout from '@/components/Layout';
@@ -57,19 +58,57 @@ const AuthenticatedApp = () => {
 
 function App() {
   const [splashDone, setSplashDone] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <SplashScreen onDone={() => setSplashDone(true)} />
-        {splashDone && (
-          <Router>
-            <AuthenticatedApp />
-          </Router>
-        )}
+        <InnerApp
+          splashDone={splashDone}
+          setSplashDone={setSplashDone}
+          loggedIn={loggedIn}
+          setLoggedIn={setLoggedIn}
+        />
         <Toaster />
       </QueryClientProvider>
     </AuthProvider>
+  );
+}
+
+function InnerApp({ splashDone, setSplashDone, loggedIn, setLoggedIn }) {
+  const { isLoadingAuth, isLoadingPublicSettings, isAuthenticated, checkUserAuth } = useAuth();
+
+  // While checking auth, show spinner
+  if (isLoadingPublicSettings || isLoadingAuth) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#12082A' }}>
+        <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Not authenticated — show login screen
+  if (!isAuthenticated && !loggedIn) {
+    return (
+      <LoginScreen
+        onAuthenticated={async () => {
+          await checkUserAuth();
+          setLoggedIn(true);
+        }}
+      />
+    );
+  }
+
+  // Authenticated — show splash then app
+  return (
+    <>
+      <SplashScreen onDone={() => setSplashDone(true)} />
+      {splashDone && (
+        <Router>
+          <AuthenticatedApp />
+        </Router>
+      )}
+    </>
   );
 }
 
