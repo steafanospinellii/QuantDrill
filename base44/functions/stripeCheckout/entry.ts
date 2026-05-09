@@ -8,7 +8,7 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
 const PRICE_MAP = {
   monthly:  { mode: 'subscription', amount: 999,   currency: 'eur', interval: 'month', name: 'QuantDrill Pro Monthly' },
   yearly:   { mode: 'subscription', amount: 5999,  currency: 'eur', interval: 'year',  name: 'QuantDrill Pro Annual' },
-  lifetime: { mode: 'payment',      amount: 17900, currency: 'eur', interval: null,    name: 'QuantDrill Early Adopter Lifetime' },
+  lifetime: { mode: 'payment',      amount: 17900, currency: 'eur', interval: null,    name: 'QuantDrill Pro Lifetime' },
 };
 
 Deno.serve(async (req) => {
@@ -24,8 +24,8 @@ Deno.serve(async (req) => {
     const sessionParams = {
       customer_email: user.email,
       metadata: { user_id: user.id, plan },
-      success_url: success_url || 'https://quantdrill.com/success',
-      cancel_url: cancel_url || 'https://quantdrill.com/subscribe',
+      success_url: success_url || 'https://quantdrill.base44.app/success',
+      cancel_url: cancel_url || 'https://quantdrill.base44.app/paywall',
       mode: priceConfig.mode,
       line_items: [{
         price_data: {

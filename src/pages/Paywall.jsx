@@ -25,7 +25,7 @@ const PLANS = [
   },
   {
     key: 'lifetime',
-    label: 'Early Adopter Lifetime',
+    label: 'Lifetime',
     price: '€179',
     period: 'once',
     badge: '🔥 Limited',
