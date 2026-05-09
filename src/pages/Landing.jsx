@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Zap, Clock, Target, TrendingUp } from 'lucide-react';
+import { Zap, Clock, Target, TrendingUp, ChevronRight } from 'lucide-react';
 
 const FEATURES = [
   {
@@ -16,16 +16,22 @@ const FEATURES = [
   {
     icon: <TrendingUp size={18} style={{ color: '#FF9933' }} />,
     title: 'Progressive difficulty',
-    desc: 'Start at your level and advance through Easy, Medium, and Hard — matching real interview complexity.',
+    desc: 'Advance through Easy, Medium, and Hard — matching the complexity of real interviews.',
   },
   {
     icon: <Clock size={18} style={{ color: '#9B6FE8' }} />,
     title: 'Short, focused daily drills',
-    desc: '2, 5, or 10-minute sessions that fit your prep schedule and build a daily training habit.',
+    desc: '2, 5, or 10-minute sessions that fit your prep schedule and build a lasting training habit.',
   },
 ];
 
 const AUDIENCES = ['MBB', 'IB', 'GMAT', 'GRE'];
+
+const STEPS = [
+  { num: '01', title: 'Pick your category', desc: 'Mental math, percentages, business math, market sizing, or GMAT quant.' },
+  { num: '02', title: 'Set your difficulty', desc: 'Start easy and progress to Hard — the level that mirrors real interview pressure.' },
+  { num: '03', title: 'Train in focused bursts', desc: '2, 5, or 10-minute sessions. Immediate feedback on every answer.' },
+];
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -36,7 +42,10 @@ export default function Landing() {
       style={{ background: '#12082A' }}
     >
       {/* ── Nav ── */}
-      <nav className="flex items-center justify-between px-6 pt-safe" style={{ paddingTop: 'max(20px, env(safe-area-inset-top, 20px))', paddingBottom: 16 }}>
+      <nav
+        className="flex items-center justify-between px-6"
+        style={{ paddingTop: 'max(20px, env(safe-area-inset-top, 20px))', paddingBottom: 16 }}
+      >
         <span className="text-xl font-grotesk font-black" style={{ color: '#fff' }}>
           Quant<span style={{ color: '#9B6FE8' }}>Drill</span>
         </span>
@@ -50,7 +59,7 @@ export default function Landing() {
       </nav>
 
       {/* ── Hero ── */}
-      <section className="flex flex-col items-center text-center px-6 pt-10 pb-12">
+      <section className="flex flex-col items-center text-center px-6 pt-10 pb-16">
         {/* Audience pills */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -75,19 +84,17 @@ export default function Landing() {
           className="text-4xl font-grotesk font-black leading-tight mb-5"
           style={{ color: '#fff', maxWidth: 340 }}
         >
-          The mental math edge for{' '}
-          <span style={{ color: '#9B6FE8' }}>MBB, IB, GMAT & GRE</span>
+          Train like the top 1% of candidates
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-sm leading-relaxed mb-8"
+          className="text-sm leading-relaxed mb-10"
           style={{ color: 'rgba(255,255,255,0.5)', maxWidth: 300 }}
         >
-          A daily mental math training tool built for high-stakes recruiting and exams. 
-          Train the skills that elite candidates develop — and most ignore.
+          Master the fast mental math skills needed for MBB, IB, GMAT & GRE — through daily, structured drilling.
         </motion.p>
 
         <motion.button
@@ -96,23 +103,28 @@ export default function Landing() {
           transition={{ delay: 0.15 }}
           onClick={() => navigate('/home')}
           className="font-grotesk font-bold text-base text-white py-4 px-10 rounded-2xl no-select active:scale-95 transition-transform flex items-center gap-2"
-          style={{ background: '#7C3AED', boxShadow: '0 0 24px rgba(124,58,237,0.4)' }}
+          style={{ background: '#7C3AED', boxShadow: '0 0 28px rgba(124,58,237,0.45)' }}
         >
           <Zap size={20} />
-          Start Training Now
+          Start Training Free
         </motion.button>
 
-        <p className="text-xs mt-4" style={{ color: 'rgba(255,255,255,0.25)' }}>No credit card required</p>
+        <p className="text-xs mt-4" style={{ color: 'rgba(255,255,255,0.25)' }}>No credit card required to get started</p>
       </section>
 
       {/* ── Divider ── */}
       <div className="mx-6 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
 
-      {/* ── Features ── */}
-      <section className="px-6 py-10 flex flex-col gap-5">
-        <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
-          What you train
-        </p>
+      {/* ── What you train ── */}
+      <section className="px-6 pt-12 pb-12 flex flex-col gap-6">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            What you train
+          </p>
+          <p className="text-xl font-grotesk font-bold" style={{ color: '#fff' }}>
+            The skills that actually matter
+          </p>
+        </div>
         {FEATURES.map((f, i) => (
           <motion.div
             key={i}
@@ -122,38 +134,80 @@ export default function Landing() {
             className="flex gap-4 items-start"
           >
             <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
             >
               {f.icon}
             </div>
             <div>
-              <p className="text-sm font-semibold mb-0.5" style={{ color: '#fff' }}>{f.title}</p>
+              <p className="text-sm font-semibold mb-1" style={{ color: '#fff' }}>{f.title}</p>
               <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>{f.desc}</p>
             </div>
           </motion.div>
         ))}
       </section>
 
-      {/* ── Claim strip ── */}
-      <section className="mx-6 mb-8 rounded-2xl px-5 py-5" style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.2)' }}>
-        <p className="text-sm font-semibold leading-relaxed text-center" style={{ color: 'rgba(255,255,255,0.7)' }}>
+      {/* ── Divider ── */}
+      <div className="mx-6 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+
+      {/* ── How it works ── */}
+      <section className="px-6 pt-12 pb-12 flex flex-col gap-6">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            How it works
+          </p>
+          <p className="text-xl font-grotesk font-bold" style={{ color: '#fff' }}>
+            Three steps to a sharper mind
+          </p>
+        </div>
+        {STEPS.map((s, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 + i * 0.08 }}
+            className="flex gap-4 items-start"
+          >
+            <span
+              className="text-xs font-black font-grotesk pt-0.5 shrink-0"
+              style={{ color: '#9B6FE8', minWidth: 24 }}
+            >
+              {s.num}
+            </span>
+            <div>
+              <p className="text-sm font-semibold mb-1" style={{ color: '#fff' }}>{s.title}</p>
+              <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>{s.desc}</p>
+            </div>
+          </motion.div>
+        ))}
+      </section>
+
+      {/* ── Quote strip ── */}
+      <section className="mx-6 mb-12 rounded-2xl px-5 py-6" style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.2)' }}>
+        <p className="text-sm font-semibold leading-relaxed text-center" style={{ color: 'rgba(255,255,255,0.75)' }}>
           "The mental math skills that separate top candidates are trainable — and QuantDrill is built to develop exactly those skills."
         </p>
       </section>
 
       {/* ── Final CTA ── */}
-      <section className="px-6 pb-safe flex flex-col items-center gap-4" style={{ paddingBottom: 'max(40px, env(safe-area-inset-bottom, 40px))' }}>
+      <section
+        className="px-6 flex flex-col items-center gap-5"
+        style={{ paddingBottom: 'max(48px, env(safe-area-inset-bottom, 48px))' }}
+      >
+        <div className="text-center mb-2">
+          <p className="text-xl font-grotesk font-black" style={{ color: '#fff' }}>Ready to train smarter?</p>
+          <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            Join candidates preparing for the world's most competitive roles.
+          </p>
+        </div>
         <button
           onClick={() => navigate('/home')}
-          className="w-full font-grotesk font-bold text-base text-white py-4 rounded-2xl no-select active:scale-95 transition-transform"
-          style={{ background: '#7C3AED', boxShadow: '0 0 20px rgba(124,58,237,0.35)' }}
+          className="w-full font-grotesk font-bold text-base text-white py-4 rounded-2xl no-select active:scale-95 transition-transform flex items-center justify-center gap-2"
+          style={{ background: '#7C3AED', boxShadow: '0 0 24px rgba(124,58,237,0.4)' }}
         >
-          Start For Free Now
+          Start Training Free
+          <ChevronRight size={18} />
         </button>
-        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>
-          Cancel anytime · No commitment
-        </p>
       </section>
     </div>
   );

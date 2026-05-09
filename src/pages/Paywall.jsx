@@ -6,9 +6,9 @@ import MobileHeader from '@/components/MobileHeader';
 import { base44 } from '@/api/base44Client';
 
 const PLANS = [
-  { key: 'monthly',  label: 'Pro Monthly',  badge: null,           sub: 'Billed monthly' },
-  { key: 'yearly',   label: 'Pro Annual',   badge: 'Best Value',   sub: 'Save 50% vs monthly' },
-  { key: 'lifetime', label: 'Lifetime',     badge: '🔥 Limited',   sub: 'Pay once, train forever' },
+  { key: 'monthly',  label: 'Pro Monthly',  price: '€9.99',  period: '/ month',  badge: null,         sub: 'Billed monthly' },
+  { key: 'yearly',   label: 'Pro Annual',   price: '€59.99', period: '/ year',   badge: 'Best Value', sub: 'Save 50% vs monthly' },
+  { key: 'lifetime', label: 'Lifetime',     price: '€179',   period: 'one-time', badge: '🔥 Limited', sub: 'Pay once, train forever' },
 ];
 
 const PREMIUM_FEATURES = [
@@ -209,6 +209,11 @@ export default function Paywall({ onClose }) {
                     <p className="text-[11px] text-muted-foreground mt-0.5">{plan.sub}</p>
                   </div>
                 </div>
+                {/* Price */}
+                <div className="text-right shrink-0">
+                  <span className="text-base font-grotesk font-black text-foreground">{plan.price}</span>
+                  <p className="text-[10px] text-muted-foreground">{plan.period}</p>
+                </div>
               </div>
 
               {selected === plan.key && (
@@ -231,7 +236,7 @@ export default function Paywall({ onClose }) {
         </motion.div>
 
         <p className="text-center text-xs text-muted-foreground mt-auto">
-          Cancel anytime · No ads · Secure payment via Stripe
+          No ads · Secure payment via Stripe
         </p>
       </div>
     </div>
