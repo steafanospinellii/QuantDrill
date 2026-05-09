@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { getSpeedPercentile } from '@/lib/questionGenerator';
 import { BADGES, computeBadgeContext } from '@/lib/badges';
 
@@ -49,13 +50,14 @@ function getNextBadgeMilestone(sessions) {
   return 'All milestones reached!';
 }
 
-function MetricCard({ label, value, sub, progress, ringColor, delay = 0, noData }) {
+function MetricCard({ label, value, sub, progress, ringColor, delay = 0, noData, onClick }) {
   return (
-    <motion.div
+    <motion.button
+      onClick={onClick}
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.35 }}
-      className="bg-surface-2 border border-border rounded-2xl p-3 flex flex-col items-center text-center gap-2"
+      className="bg-surface-2 border border-border rounded-2xl p-3 flex flex-col items-center text-center gap-2 w-full active:scale-95 transition-transform no-select"
     >
       <p className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest leading-none w-full text-center">
         {label}
@@ -71,11 +73,12 @@ function MetricCard({ label, value, sub, progress, ringColor, delay = 0, noData 
       <p className="text-[10px] text-muted-foreground leading-snug min-h-[28px] flex items-center justify-center px-1">
         {noData ? 'No data yet' : (sub || '')}
       </p>
-    </motion.div>
+    </motion.button>
   );
 }
 
 export default function BenchmarkMetrics({ sessions }) {
+  const navigate = useNavigate();
   const last5 = sessions.slice(0, 5);
   const hasData = last5.length > 0;
 
@@ -108,6 +111,7 @@ export default function BenchmarkMetrics({ sessions }) {
         ringColor={accuracyColor}
         delay={0.05}
         noData={!hasData}
+        onClick={() => navigate('/progress#accuracy')}
       />
       <MetricCard
         label="Speed Rank"
@@ -117,6 +121,7 @@ export default function BenchmarkMetrics({ sessions }) {
         ringColor="hsl(262 83% 68%)"
         delay={0.1}
         noData={!hasData}
+        onClick={() => navigate('/progress#speed')}
       />
       <MetricCard
         label="Volume"
@@ -126,6 +131,7 @@ export default function BenchmarkMetrics({ sessions }) {
         ringColor="hsl(28 100% 58%)"
         delay={0.15}
         noData={totalSessions === 0}
+        onClick={() => navigate('/progress#sessions')}
       />
     </div>
   );

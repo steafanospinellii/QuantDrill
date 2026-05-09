@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Flame, TrendingUp, Zap, Target, Clock, Lock } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { format, subDays } from 'date-fns';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import PullToRefreshIndicator from '@/components/PullToRefreshIndicator';
@@ -16,6 +17,8 @@ export default function Progress() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [scrolled, setScrolled] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -30,6 +33,18 @@ export default function Progress() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    if (!scrolled && location.hash) {
+      setTimeout(() => {
+        const element = document.getElementById(location.hash.replace('#', ''));
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+          setScrolled(true);
+        }
+      }, 100);
+    }
+  }, [location.hash, scrolled]);
 
   const { containerRef, pullDistance, isRefreshing, handlers } = usePullToRefresh(load);
 
@@ -195,21 +210,79 @@ export default function Progress() {
         </motion.div>
       )}
 
+      {/* Accuracy Chart */}
+      <motion.div id="accuracy" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }} className="bg-surface-1 border border-border rounded-3xl p-5 mb-6 scroll-mt-20">
+        <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-4">Accuracy — 5-Session Moving Average</p>
+        {sessions.length >= 5 ? (
+          <ResponsiveContainer width="100%" height={180}>
+            <LineChart data={computeMovingAverage(sessions, 'accuracy')}>
+              <XAxis dataKey="session" axisLine={false} tickLine={false} tick={{ fill: 'hsl(220 10% 50%)', fontSize: 10 }} />
+              <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: 'hsl(220 10% 50%)', fontSize: 10 }} />
+              <Tooltip
+                contentStyle={{ background: 'hsl(220 18% 9%)', border: '1px solid hsl(220 15% 16%)', borderRadius: 12, color: '#fff', fontSize: 12 }}
+                formatter={(v) => [`${v}%`, 'Accuracy']}
+              />
+              <Line type="monotone" dataKey="value" stroke="hsl(262 83% 68%)" strokeWidth={2} dot={false} isAnimationActive={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-[180px] flex items-center justify-center text-muted-foreground text-sm">Finish 5 sessions to see chart</div>
+        )}
+      </motion.div>
+
+      {/* Speed Chart */}
+      <motion.div id="speed" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.41 }} className="bg-surface-1 border border-border rounded-3xl p-5 mb-6 scroll-mt-20">
+        <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-4">Response Time — 5-Session Moving Average (seconds)</p>
+        {sessions.length >= 5 ? (
+          <ResponsiveContainer width="100%" height={180}>
+            <LineChart data={computeMovingAverage(sessions, 'speed')}>
+              <XAxis dataKey="session" axisLine={false} tickLine={false} tick={{ fill: 'hsl(220 10% 50%)', fontSize: 10 }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: 'hsl(220 10% 50%)', fontSize: 10 }} />
+              <Tooltip
+                contentStyle={{ background: 'hsl(220 18% 9%)', border: '1px solid hsl(220 15% 16%)', borderRadius: 12, color: '#fff', fontSize: 12 }}
+                formatter={(v) => [`${v}s`, 'Avg Time']}
+              />
+              <Line type="monotone" dataKey="value" stroke="hsl(262 83% 68%)" strokeWidth={2} dot={false} isAnimationActive={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-[180px] flex items-center justify-center text-muted-foreground text-sm">Finish 5 sessions to see chart</div>
+        )}
+      </motion.div>
+
       {/* Recent sessions */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-        <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-3">Recent Sessions</p>
+      <motion.div id="sessions" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.44 }} className="scroll-mt-20">
+        <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mb-3">All Sessions</p>
         {sessions.length === 0 ? (
           <div className="bg-surface-1 border border-border rounded-2xl p-6 text-center">
             <p className="text-muted-foreground text-sm">No sessions yet. Start your first drill!</p>
           </div>
         ) : (
           <div className="space-y-2">
-            {sessions.slice(0, 10).map((s, i) => <SessionRow key={s.id || i} session={s} />)}
+            {sessions.map((s, i) => <SessionRow key={s.id || i} session={s} />)}
           </div>
         )}
       </motion.div>
     </div>
   );
+}
+
+function computeMovingAverage(sessions, metric) {
+  const sorted = [...sessions].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const result = [];
+
+  for (let i = 4; i < sorted.length; i++) {
+    const window = sorted.slice(i - 4, i + 1);
+    let avg = 0;
+    if (metric === 'accuracy') {
+      avg = Math.round(window.reduce((s, r) => s + (r.accuracy || 0), 0) / window.length);
+    } else if (metric === 'speed') {
+      avg = parseFloat((window.reduce((s, r) => s + (r.avg_time || 0), 0) / window.length).toFixed(1));
+    }
+    result.push({ session: i - 3, value: avg });
+  }
+
+  return result;
 }
 
 function MiniStat({ icon, label, value, sub, highlight }) {
