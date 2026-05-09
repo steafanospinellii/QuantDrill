@@ -55,18 +55,10 @@ export default function SettingsModal({ open, onClose }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-            className="fixed inset-x-5 z-[9999] mx-auto max-w-sm lg:max-w-md"
+            className="fixed inset-x-5 z-[9999] mx-auto max-w-[480px]"
             style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-          >
-            <div className="bg-surface-1 border border-border rounded-3xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-grotesk font-bold text-foreground">Settings</h2>
-                <button onClick={onClose} className="w-8 h-8 bg-surface-2 rounded-xl flex items-center justify-center no-select">
-                  <X size={16} className="text-muted-foreground" />
-                </button>
-              </div>
-
-              <div>
+            >
+            <div className="bg-surface-1 border border-border rounded-3xl p-6 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-grotesk font-bold text-foreground">Settings</h2>
                 <button onClick={onClose} className="w-8 h-8 bg-surface-2 rounded-xl flex items-center justify-center no-select">
@@ -130,10 +122,9 @@ export default function SettingsModal({ open, onClose }) {
                 </motion.div>
               )}
             </div>
-            </div>
-            </motion.div>
-            </>
-            )}
-            </AnimatePresence>
-            );
-            }
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
