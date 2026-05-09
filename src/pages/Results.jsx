@@ -9,7 +9,7 @@ export default function Results() {
   const { state } = useLocation();
 
   if (!state) {
-    navigate('/');
+    navigate('/home');
     return null;
   }
 
@@ -23,7 +23,7 @@ export default function Results() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col pb-8">
-      <MobileHeader title="" onBack={() => navigate('/')} />
+      <MobileHeader title="" onBack={() => navigate('/home')} />
 
       <div className="flex-1 flex flex-col px-5 pt-6">
 
@@ -104,7 +104,7 @@ export default function Results() {
             <RotateCcw size={17} /> Train Again
           </button>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/home')}
             className="w-full bg-surface-2 border border-border text-foreground font-semibold text-base py-4 rounded-2xl transition-all active:scale-95 no-select flex items-center justify-center gap-2"
           >
             <Home size={17} /> Return Home

@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { useState } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import PageTransition from '@/components/PageTransition';
 import PageNotFound from './lib/PageNotFound';
@@ -19,7 +19,7 @@ import Badges from '@/pages/Badges';
 import Paywall from '@/pages/Paywall';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated } = useAuth();
   const location = useLocation();
 
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -37,7 +37,7 @@ const AuthenticatedApp = () => {
   return (
     <AnimatePresence mode="wait" initial={false}>
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Landing />} />
+        <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <Landing />} />
         <Route element={<Layout />}>
           <Route path="/home" element={<Home />} />
           <Route path="/progress" element={<Progress />} />
