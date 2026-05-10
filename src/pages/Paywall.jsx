@@ -91,7 +91,7 @@ export default function Paywall({ onClose }) {
   if (isPaymentSuccess) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 text-center">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="sync">
           {premiumStatus === 'active' ? (
             <motion.div
               key="active"

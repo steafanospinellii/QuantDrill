@@ -22,10 +22,11 @@ export default function SettingsModal({ open, onClose }) {
   const handleDeleteAccount = async () => {
     setDeleting(true);
     try {
-      // Get current user to get their ID
       const user = await base44.auth.me();
       if (user?.id) {
-        // Delete the user account via service role
+        // GDPR: delete all Session records owned by this user before deleting account
+        const userSessions = await base44.asServiceRole.entities.Session.filter({ user_id: user.id });
+        await Promise.all(userSessions.map(s => base44.asServiceRole.entities.Session.delete(s.id)));
         await base44.asServiceRole.entities.User.delete(user.id);
       }
       clearUserCache();

@@ -82,11 +82,7 @@ export default function Home() {
             <Settings size={16} className="text-muted-foreground" />
           </button>
         </div>
-        <div className="hidden lg:block">
-          <h1 className="text-2xl font-grotesk font-bold text-foreground tracking-tight">
-            Quant<span className="text-neon-purple">Drill</span>
-          </h1>
-        </div>
+        {/* Desktop: sidebar already shows the logo — no duplicate title needed */}
       </motion.div>
 
       {/* ── Streak bar ── */}

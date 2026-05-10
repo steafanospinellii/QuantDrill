@@ -3,6 +3,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const SESSION_KEY = 'qd_splash_shown';
 
+// Inline SVG Q logo — no external PNG, no white square
+function QLogo() {
+  return (
+    <svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Outer circle */}
+      <circle cx="48" cy="48" r="40" stroke="#7C3AED" strokeWidth="6" fill="none" />
+      {/* Q tail */}
+      <line x1="60" y1="62" x2="74" y2="76" stroke="#7C3AED" strokeWidth="6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export default function SplashScreen({ onDone }) {
   const alreadyShown = sessionStorage.getItem(SESSION_KEY);
   const [visible, setVisible] = useState(!alreadyShown);
@@ -13,7 +25,6 @@ export default function SplashScreen({ onDone }) {
       return;
     }
     sessionStorage.setItem(SESSION_KEY, '1');
-    // hold = fade-in(0.4s) + hold(1.2s) = 1600ms before starting fade-out
     const timer = setTimeout(() => setVisible(false), 1600);
     return () => clearTimeout(timer);
   }, []);
@@ -28,15 +39,15 @@ export default function SplashScreen({ onDone }) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4, ease: 'easeInOut' }}
           style={{ backgroundColor: '#12082A' }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-4"
         >
-          <img
-            src="https://media.base44.com/images/public/69fcb12caee6ab9a4c226c8f/aa9e7382c_Untitleddesign1.png"
-            alt="QuantDrill"
-            width={160}
-            style={{ height: 'auto', display: 'block', backgroundColor: 'transparent' }}
-            draggable={false}
-          />
+          <QLogo />
+          <span
+            className="font-grotesk font-black text-2xl tracking-tight"
+            style={{ color: '#7C3AED' }}
+          >
+            Quant<span style={{ color: '#fff' }}>Drill</span>
+          </span>
         </motion.div>
       )}
     </AnimatePresence>

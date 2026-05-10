@@ -21,6 +21,7 @@ import Privacy from '@/pages/Privacy';
 import Terms from '@/pages/Terms';
 import EmailVerification from '@/pages/EmailVerification';
 import CookieBanner from '@/components/CookieBanner';
+// CookieBanner is rendered at root level so it mounts for ALL users (auth + unauth)
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated } = useAuth();
@@ -42,12 +43,15 @@ const AuthenticatedApp = () => {
   // Unauthenticated → go straight to Landing, no splash
   if (authError?.type === 'auth_required' || !isAuthenticated) {
     return (
-      <AnimatePresence mode="wait" initial={false}>
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<Landing />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AnimatePresence>
+      <>
+        <AnimatePresence mode="wait" initial={false}>
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<Landing />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AnimatePresence>
+        <CookieBanner />
+      </>
     );
   }
 
@@ -74,6 +78,7 @@ const AuthenticatedApp = () => {
         <Route path="*" element={<PageNotFound />} />
       </Routes>
       <CookieBanner />
+      {/* CookieBanner renders itself only when no consent exists — safe to always mount */}
     </AnimatePresence>
   );
 };

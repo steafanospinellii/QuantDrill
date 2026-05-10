@@ -28,6 +28,9 @@ export default function ProfileModal({ open, onClose, user, isPremium }) {
   const [showCancellation, setShowCancellation] = useState(false);
   const [showReminders, setShowReminders] = useState(false);
   const [badgesCount, setBadgesCount] = useState(0);
+  const [editingName, setEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState('');
+  const [savingName, setSavingName] = useState(false);
 
   useEffect(() => {
     if (showReminders || showCancellation) return;
@@ -43,6 +46,17 @@ export default function ProfileModal({ open, onClose, user, isPremium }) {
     loadBadges();
   }, [open, user, showReminders, showCancellation]);
 
+  const handleSaveName = async () => {
+    if (!nameValue.trim()) return;
+    setSavingName(true);
+    try {
+      await base44.auth.updateMe({ full_name: nameValue.trim() });
+      window.location.reload();
+    } catch (e) {
+      setSavingName(false);
+    }
+  };
+
   const handleLogout = () => {
     clearUserCache();
     base44.auth.logout('/');
@@ -52,6 +66,9 @@ export default function ProfileModal({ open, onClose, user, isPremium }) {
     setDeleting(true);
     try {
       if (user?.id) {
+        // GDPR: delete all Session records owned by this user before deleting account
+        const userSessions = await base44.asServiceRole.entities.Session.filter({ user_id: user.id });
+        await Promise.all(userSessions.map(s => base44.asServiceRole.entities.Session.delete(s.id)));
         await base44.asServiceRole.entities.User.delete(user.id);
       }
       clearUserCache();
@@ -95,9 +112,29 @@ export default function ProfileModal({ open, onClose, user, isPremium }) {
                         {getInitials(user?.email)}
                       </span>
                     </div>
-                    <h2 className="text-lg font-grotesk font-bold text-foreground mb-1">
-                      {user?.full_name || 'User'}
-                    </h2>
+                    {editingName ? (
+                      <div className="flex items-center gap-2 justify-center mb-1">
+                        <input
+                          autoFocus
+                          value={nameValue}
+                          onChange={e => setNameValue(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') setEditingName(false); }}
+                          className="bg-surface-2 border border-primary rounded-lg px-3 py-1.5 text-sm font-semibold text-foreground text-center focus:outline-none w-40"
+                        />
+                        <button onClick={handleSaveName} disabled={savingName} className="text-xs font-bold text-primary no-select">
+                          {savingName ? '...' : 'Save'}
+                        </button>
+                        <button onClick={() => setEditingName(false)} className="text-xs text-muted-foreground no-select">✕</button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => { setNameValue(user?.full_name || ''); setEditingName(true); }}
+                        className="text-lg font-grotesk font-bold text-foreground mb-1 hover:text-primary transition-colors no-select group flex items-center gap-1.5 mx-auto"
+                      >
+                        {user?.full_name || 'User'}
+                        <span className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">✎</span>
+                      </button>
+                    )}
                     <p className="text-sm text-muted-foreground mb-4">{user?.email}</p>
 
                     {/* Subscription badge */}
