@@ -177,8 +177,8 @@ export default function Drill() {
 
       <div className="flex-1 flex flex-col w-full lg:max-w-xl lg:mx-auto lg:w-full relative z-10">
 
-        {/* Global timer — Fast-Paced mode only */}
-        {isFastPaced && (
+        {/* Session timer — always shown (Normal uses duration or default 5min display, Fast-Paced uses chosen duration) */}
+        {totalSeconds && (
           <div className="mt-4">
             <GlobalTimer totalSeconds={totalSeconds} onExpire={handleTimerExpire} isActive={sessionActive} />
           </div>
@@ -252,8 +252,8 @@ export default function Drill() {
               transition: 'background 0.25s ease',
             }} />
 
-            {/* Soft urgency ring — Normal mode only */}
-            {!isFastPaced && flash === null && (
+            {/* Per-question urgency ring — Fast-Paced mode only */}
+            {isFastPaced && flash === null && (
               <div className="absolute top-4 right-4">
                 <SoftTimerRing difficulty={difficulty} questionStartTime={startTime} />
               </div>

@@ -106,7 +106,7 @@ export default function DifficultySheet({ open, value, onClose, category, onStar
                     </span>
                     {pace === 'normal' && <Check size={13} className="text-primary shrink-0" />}
                   </div>
-                  <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>Untimed · practice focus</p>
+                  <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>No session timer · focus mode</p>
                 </button>
 
                 {/* Fast-Paced */}
