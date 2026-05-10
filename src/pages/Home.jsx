@@ -171,7 +171,7 @@ export default function Home() {
           className="flex items-center justify-between gap-3 px-4 py-3 rounded-2xl border border-[#7C3AED]/40 bg-[#7C3AED]/10"
         >
           <p className="text-xs text-foreground leading-snug flex-1">
-            <span className="font-bold text-[#a78bfa]">Unlock Pro</span> — unlimited drills, all categories, hard mode
+            <span className="font-bold text-[#a78bfa]">Unlock Pro</span> — unlimited drills, all categories, hard mode + 200 badges across 6 performance categories
           </p>
           <button
             onClick={() => navigate('/paywall')}

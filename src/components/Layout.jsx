@@ -63,9 +63,9 @@ export default function Layout() {
       <aside className="hidden lg:flex flex-col fixed top-0 left-0 h-full w-60 bg-[#0F1520] border-r border-border z-40 shrink-0">
         {/* Logo */}
         <div className="px-6 pt-8 pb-6 border-b border-border">
-          <span className="text-xl font-grotesk font-black text-foreground tracking-tight">
+          <button onClick={() => navigate('/home')} className="text-xl font-grotesk font-black text-foreground tracking-tight no-select hover:opacity-80 transition-opacity">
             Quant<span className="text-primary">Drill</span>
-          </span>
+          </button>
         </div>
 
         {/* Nav */}

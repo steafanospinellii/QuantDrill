@@ -39,6 +39,7 @@ function getNextBadgeMilestone(sessions) {
     { drills: 10,  label: 'Warming Up' },
     { drills: 100, label: 'Centurion' },
     { drills: 500, label: 'Elite Performer' },
+    { drills: 1000, label: '200 badges across 6 performance categories' },
   ];
 
   for (const m of milestones) {
