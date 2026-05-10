@@ -41,11 +41,11 @@ export default function DifficultySheet({ open, value, onClose, category, onStar
   const handleStart = () => {
     if (!canStart) return;
     if (onNeedsAuth) {
-      onNeedsAuth({ difficulty, duration: pace === 'fast' ? duration : null, category, pace });
+      onNeedsAuth({ difficulty, duration, category, pace });
       return;
     }
     onClose();
-    onStart({ difficulty, duration: pace === 'fast' ? duration : null, category, pace });
+    onStart({ difficulty, duration, category, pace });
   };
 
   return (
@@ -129,36 +129,26 @@ export default function DifficultySheet({ open, value, onClose, category, onStar
                 </button>
               </div>
 
-              {/* ── DURATION (only in Fast-Paced) ── */}
-              <AnimatePresence>
-                {pace === 'fast' && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                    className="overflow-hidden"
-                  >
-                    <p className="text-[10px] font-bold uppercase tracking-widest mb-2.5" style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.13em' }}>Duration</p>
-                    <div className="flex gap-2 mb-6">
-                      {DURATIONS.map(d => (
-                        <button
-                          key={d.minutes}
-                          onClick={() => setDuration(d.minutes)}
-                          className="flex-1 py-3 rounded-2xl border font-grotesk font-bold text-sm no-select transition-all"
-                          style={{
-                            background: duration === d.minutes ? 'rgba(124,58,237,0.1)' : 'hsl(220 16% 12%)',
-                            border: duration === d.minutes ? '1px solid rgba(124,58,237,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                            color: duration === d.minutes ? 'hsl(262 83% 68%)' : 'rgba(255,255,255,0.6)',
-                          }}
-                        >
-                          {d.label}
-                        </button>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* ── DURATION (always shown) ── */}
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-2.5" style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.13em' }}>Duration</p>
+                <div className="flex gap-2 mb-6">
+                  {DURATIONS.map(d => (
+                    <button
+                      key={d.minutes}
+                      onClick={() => setDuration(d.minutes)}
+                      className="flex-1 py-3 rounded-2xl border font-grotesk font-bold text-sm no-select transition-all"
+                      style={{
+                        background: duration === d.minutes ? 'rgba(124,58,237,0.1)' : 'hsl(220 16% 12%)',
+                        border: duration === d.minutes ? '1px solid rgba(124,58,237,0.4)' : '1px solid rgba(255,255,255,0.07)',
+                        color: duration === d.minutes ? 'hsl(262 83% 68%)' : 'rgba(255,255,255,0.6)',
+                      }}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {/* ── DIFFICULTY ── */}
               <p className="text-[10px] font-bold uppercase tracking-widest mb-2.5" style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.13em' }}>Difficulty</p>
@@ -240,7 +230,7 @@ export default function DifficultySheet({ open, value, onClose, category, onStar
                 onMouseLeave={e => canStart && (e.currentTarget.style.boxShadow = '0 0 30px rgba(124,58,237,0.35)')}
               >
                 {pace === 'fast' ? <Zap size={18} /> : <Check size={18} />}
-                {pace === 'fast' ? `Start ${duration}-Minute Session` : 'Start Session'}
+                {`Start ${duration}-Minute Session`}
               </motion.button>
             </div>
           </motion.div>
