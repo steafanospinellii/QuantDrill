@@ -80,15 +80,13 @@ export default function DifficultySheet({ open, value, onClose, category, onStar
                          if (isAccessible) {
                            setDifficulty(opt.key);
                          } else {
-                           // User cannot access this difficulty
                            onClose();
                            navigate('/paywall');
                          }
                        }}
-                       disabled={!isAccessible}
                        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border text-left no-select transition-all active:scale-[0.98] ${
                          !isAccessible
-                           ? 'opacity-50 cursor-not-allowed'
+                           ? 'opacity-50 cursor-pointer'
                            : difficulty === opt.key
                            ? 'bg-primary/10 border-primary'
                            : 'bg-surface-2 border-border'

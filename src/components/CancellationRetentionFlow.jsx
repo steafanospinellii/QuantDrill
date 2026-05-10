@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, AlertCircle, ChevronRight } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 export default function CancellationRetentionFlow({ open, onClose, user, streakCount, badgesCount }) {
   const [step, setStep] = useState(1);
@@ -22,14 +23,9 @@ export default function CancellationRetentionFlow({ open, onClose, user, streakC
     }
 
     try {
-      const res = await fetch('/api/getStripePortalUrl', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.open(data.url, '_blank');
+      const res = await base44.functions.invoke('getStripePortalUrl', {});
+      if (res.data?.url) {
+        window.open(res.data.url, '_blank');
         onClose();
       }
     } catch (e) {
