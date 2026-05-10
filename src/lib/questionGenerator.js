@@ -371,18 +371,10 @@ const CATEGORY_GENERATORS = {
   ],
 };
 
-export function generateQuestion(difficulty = 'medium', category = 'daily', previousPrompt = null) {
+export function generateQuestion(difficulty = 'medium', category = 'daily') {
   const generators = CATEGORY_GENERATORS[category] || CATEGORY_GENERATORS.daily;
-  let q = pick(generators)(difficulty);
-  if (previousPrompt && q.prompt === previousPrompt) {
-    // Retry once
-    q = pick(generators)(difficulty);
-    // If still the same, nudge the answer by 1 to force a unique question
-    if (q.prompt === previousPrompt) {
-      q = { ...q, correct_answer: q.correct_answer + 1, prompt: q.prompt + ' ' };
-    }
-  }
-  return q;
+  const gen = pick(generators);
+  return gen(difficulty);
 }
 
 export function generateSession(difficulty = 'medium', count = 10, category = 'daily') {

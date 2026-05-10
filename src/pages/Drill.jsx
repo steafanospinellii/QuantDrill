@@ -38,9 +38,9 @@ export default function Drill() {
     setTimeout(() => inputRef.current?.focus(), 50);
   }, [currentQ]);
 
-  const advanceToNext = useCallback((newResults, prevPrompt) => {
+  const advanceToNext = useCallback((newResults) => {
     resultsRef.current = newResults;
-    setCurrentQ(generateQuestion(difficulty, category, prevPrompt));
+    setCurrentQ(generateQuestion(difficulty, category));
     setQuestionCount(c => c + 1);
     setFlash(null);
   }, [difficulty, category]);
@@ -102,7 +102,7 @@ export default function Drill() {
       setFlash('correct');
       // Haptic feedback on mobile
       if (navigator.vibrate) navigator.vibrate(40);
-      setTimeout(() => advanceToNext(newResults, currentQ.prompt), 380);
+      setTimeout(() => advanceToNext(newResults), 380);
     }
   };
 
@@ -123,7 +123,7 @@ export default function Drill() {
     const result = { correct: false, timeTaken, answer, correctAnswer: currentQ.correct_answer };
     const newResults = [...resultsRef.current, result];
     setFlash('wrong');
-    setTimeout(() => advanceToNext(newResults, currentQ.prompt), 600);
+    setTimeout(() => advanceToNext(newResults), 600);
   };
 
   // Border color based on flash
@@ -162,7 +162,7 @@ export default function Drill() {
         <div className="bg-surface-1 border border-border rounded-3xl p-6 mb-5 min-h-[160px] flex items-center">
           <AnimatePresence mode="wait">
             <QuestionCard
-              key={questionCount}
+              key={`${questionCount}-${currentQ.prompt}`}
               question={currentQ}
               questionNumber={questionCount + 1}
               total={null}
